@@ -11,6 +11,11 @@ Pre-1.0 semver: **minor = breaking**, patch = compatible.
 First release: promo codes and automatic discounts over opaque purchasables.
 
 ### Added
+- Orders seam gate `tests/test_orders_seam.py`: payloads validated against
+  orders' own Function schemas (fixtures pinned by orders sha), then against
+  ours, then sent through comm; answers validated against orders' result
+  schemas. Hook input schemas declare `user_id` and `actor_id` and stay open
+  to additive keys; outputs stay strict.
 - Explicit checkout hook order (`preset.py`): inventory 50 (stock first),
   promotions 100, delivery 200 — never a tie broken by name.
 - README wiring snippets in the merge forms (the scaffold's

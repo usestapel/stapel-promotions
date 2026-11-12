@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "checkout_hooks.commit",
+  "description": "commit of a STAPEL_ORDERS['CHECKOUT_HOOKS'] entry, called after the checkout transaction that placed the order commits, and retried by the hook sweep until it answers ok. token may be null: act on (attempt_key, hook name). Idempotent. The answer may carry keys beyond ok (token, errors, ...); orders reads ok only. ok: true is final: orders never re-sends that call — a companion that does not know the attempt key may answer ok: true (and log on its side) to stop the retries. A cancel that arrives before an unanswered commit wins: orders stops retrying the commit and sends release (reason cancelled).",
+  "type": "object",
+  "properties": {
+    "attempt_key": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "token": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 255
+    },
+    "order_id": {
+      "type": "string"
+    },
+    "user_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 64
+    },
+    "actor_id": {
+      "type": "string",
+      "maxLength": 64,
+      "description": "The acting account id, guest or not; always sent since 0.2.0 (user_id is null for a guest)."
+    }
+  },
+  "required": [
+    "attempt_key",
+    "token",
+    "order_id",
+    "user_id"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "result": {
+      "type": "object",
+      "properties": {
+        "ok": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "ok"
+      ],
+      "additionalProperties": true
+    }
+  }
+}

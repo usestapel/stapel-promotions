@@ -31,6 +31,14 @@
       "maxLength": 64,
       "description": "checkout_failed | cancelled | orphaned"
     },
+    "user_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 64,
+      "description": "The account id; null for a guest (actor_id names the guest)."
+    },
     "actor_id": {
       "type": [
         "string",

@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "checkout_hooks.release",
+  "description": "release of a STAPEL_ORDERS['CHECKOUT_HOOKS'] entry: on a failed checkout (checkout_failed), on cancel of a placed order (cancelled), and by the hook sweep for a checkout that never finished (orphaned). Retried until it answers ok. token may be null and the pair may never have been reserved: act on (attempt_key, hook name) and answer ok when there is nothing to release. Idempotent. The answer may carry keys beyond ok (token, errors, ...); orders reads ok only. ok: true is final: orders never re-sends that call — a companion that does not know the attempt key may answer ok: true (and log on its side) to stop the retries.",
+  "type": "object",
+  "properties": {
+    "attempt_key": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "token": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 255
+    },
+    "order_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "reason": {
+      "enum": [
+        "checkout_failed",
+        "cancelled",
+        "orphaned"
+      ]
+    },
+    "user_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 64,
+      "description": "The account id; null for a guest (actor_id then names the guest account)."
+    },
+    "actor_id": {
+      "type": "string",
+      "maxLength": 64,
+      "description": "The acting account id, guest or not; always sent since 0.2.0 (user_id is null for a guest)."
+    }
+  },
+  "required": [
+    "attempt_key",
+    "token",
+    "order_id",
+    "reason"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "result": {
+      "type": "object",
+      "properties": {
+        "ok": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "ok"
+      ],
+      "additionalProperties": true
+    }
+  }
+}

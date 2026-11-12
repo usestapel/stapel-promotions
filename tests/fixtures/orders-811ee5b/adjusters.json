@@ -1,0 +1,241 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "adjusters",
+  "description": "The quote contract every STAPEL_ORDERS['ADJUSTERS'] entry implements under its own Function name ({'quote': '<function>', 'order': int}; discounts 100, shipping 200, tax 300). Input: the cart and the adjustments earlier adjusters answered. Output ($defs.result): adjustments (signed 2-dp decimal strings in the cart currency; negative lowers the total) and errors. total = max(0, subtotal + sum(amount)). Any error refuses the checkout with its code; the quote endpoint shows it. line_index is the position in lines. meta is kept on the order but never shown publicly and must not hold personal data. An unanswered or malformed reply is error.503.adjuster_unavailable.",
+  "type": "object",
+  "properties": {
+    "currency": {
+      "type": "string",
+      "pattern": "^[A-Z]{3}$"
+    },
+    "subtotal": {
+      "type": "string",
+      "pattern": "^[0-9]{1,16}(\\.[0-9]{1,2})?$"
+    },
+    "user_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 64,
+      "description": "null for a guest (anonymous account)."
+    },
+    "actor_id": {
+      "type": "string",
+      "maxLength": 64,
+      "description": "The acting account id, guest or not; always sent since 0.2.0 (user_id is null for a guest)."
+    },
+    "lines": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/line"
+      }
+    },
+    "adjustments_so_far": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/applied_adjustment"
+      }
+    },
+    "context": {
+      "type": "object",
+      "description": "Opaque client object (codes, delivery, ...); validated by the adjuster that owns the key, never by orders."
+    }
+  },
+  "required": [
+    "currency",
+    "subtotal",
+    "user_id",
+    "lines",
+    "adjustments_so_far",
+    "context"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "line": {
+      "type": "object",
+      "properties": {
+        "index": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "purchasable_type": {
+          "type": "string",
+          "maxLength": 32
+        },
+        "purchasable_key": {
+          "type": "string",
+          "maxLength": 255
+        },
+        "quantity": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "unit_price": {
+          "type": "string",
+          "pattern": "^[0-9]{1,16}(\\.[0-9]{1,2})?$"
+        },
+        "line_total": {
+          "type": "string",
+          "pattern": "^[0-9]{1,16}(\\.[0-9]{1,2})?$"
+        },
+        "attrs": {
+          "type": "object",
+          "maxProperties": 32,
+          "additionalProperties": {
+            "type": [
+              "string",
+              "number",
+              "boolean",
+              "null"
+            ]
+          }
+        }
+      },
+      "required": [
+        "index",
+        "purchasable_type",
+        "purchasable_key",
+        "quantity",
+        "unit_price",
+        "line_total",
+        "attrs"
+      ],
+      "additionalProperties": false
+    },
+    "adjustment": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "enum": [
+            "discount",
+            "shipping",
+            "tax",
+            "fee"
+          ]
+        },
+        "code": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "label": {
+          "type": "string"
+        },
+        "amount": {
+          "type": "string",
+          "pattern": "^-?[0-9]{1,14}(\\.[0-9]{1,2})?$"
+        },
+        "line_index": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "meta": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "kind",
+        "amount"
+      ],
+      "additionalProperties": true
+    },
+    "applied_adjustment": {
+      "description": "An adjustment as orders hands it on: normalized, plus the adjuster name.",
+      "type": "object",
+      "properties": {
+        "kind": {
+          "enum": [
+            "discount",
+            "shipping",
+            "tax",
+            "fee"
+          ]
+        },
+        "code": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "label": {
+          "type": "string"
+        },
+        "amount": {
+          "type": "string",
+          "pattern": "^-?[0-9]{1,14}(\\.[0-9]{1,2})?$"
+        },
+        "line_index": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "meta": {
+          "type": "object"
+        },
+        "adjuster": {
+          "type": "string",
+          "maxLength": 64
+        }
+      },
+      "required": [
+        "kind",
+        "code",
+        "label",
+        "amount",
+        "line_index",
+        "meta",
+        "adjuster"
+      ],
+      "additionalProperties": false
+    },
+    "error": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string",
+          "minLength": 1,
+          "description": "An i18n key error.<status>.<slug>; a 4xx status in the key is the HTTP status of the checkout refusal, anything else is 409."
+        },
+        "field": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "params": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "code"
+      ],
+      "additionalProperties": false
+    },
+    "result": {
+      "type": "object",
+      "properties": {
+        "adjustments": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/adjustment"
+          }
+        },
+        "errors": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/error"
+          }
+        }
+      },
+      "required": [
+        "adjustments",
+        "errors"
+      ],
+      "additionalProperties": true
+    }
+  }
+}
