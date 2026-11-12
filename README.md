@@ -26,7 +26,7 @@ pip install stapel-promotions
 |---|---|
 | Version | `0.1.0` |
 | Python | `>=3.11` (3.11, 3.12, 3.13, 3.14) |
-| HTTP operations | 13 |
+| HTTP operations | 14 |
 | Config axes | 1 |
 | Extension points | 7 |
 | Error codes | 65 |

@@ -141,8 +141,43 @@ def delete_promotion(promotion_id) -> None:
     promotion.delete()
 
 
-def list_codes(promotion_id):
-    return PromoCode.objects.filter(promotion=get_promotion(promotion_id))
+def list_codes(promotion_id, batch: str | None = None):
+    qs = PromoCode.objects.filter(promotion=get_promotion(promotion_id))
+    if batch:
+        qs = qs.filter(batch=batch)
+    return qs
+
+
+#: Columns of the staff CSV export of a promotion's codes.
+CODE_EXPORT_COLUMNS = ("code", "batch", "is_active", "usage_limit", "assigned_user_id", "created_at")
+#: A spreadsheet reads a cell starting with one of these as a formula.
+_FORMULA_LEADS = ("=", "+", "-", "@", "\t", "\r")
+
+
+def csv_cell(value) -> str:
+    """A cell a spreadsheet will not evaluate (CSV/formula injection guard)."""
+    text = "" if value is None else str(value)
+    return f"'{text}" if text.startswith(_FORMULA_LEADS) else text
+
+
+def export_code_rows(promotion_id, batch: str | None = None):
+    """Rows of the codes CSV (header first) in pk order, as a lazy iterator.
+
+    The promotion is resolved now (an unknown id raises before anything
+    streams); the rows are read in chunks while the response is written.
+    """
+    qs = list_codes(promotion_id, batch).order_by("pk")
+
+    def rows():
+        yield list(CODE_EXPORT_COLUMNS)
+        for code in qs.iterator(chunk_size=500):
+            yield [csv_cell(v) for v in (
+                code.code, code.batch, "true" if code.is_active else "false",
+                "" if code.usage_limit is None else code.usage_limit,
+                code.assigned_user_id, code.created_at.isoformat(),
+            )]
+
+    return rows()
 
 
 def create_code(promotion_id, data: dict) -> PromoCode:

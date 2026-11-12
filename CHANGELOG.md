@@ -11,6 +11,8 @@ Pre-1.0 semver: **minor = breaking**, patch = compatible.
 First release: promo codes and automatic discounts over opaque purchasables.
 
 ### Added
+- Staff codes list filters by `?batch=`; `GET staff/promotions/{id}/codes/export/`
+  streams a promotion's codes as CSV with formula-injection-safe cells.
 - `error.409.promotion_exhausted` carries `code` next to `label` when the
   refused grant came from a promo code.
 - `error.400.promo_code_format_invalid` states the rule the code applies:

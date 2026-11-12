@@ -56,7 +56,7 @@
       "summary": "A promotion reached its total usage cap."
     }
   ],
-  "operations_total": 13,
+  "operations_total": 14,
   "requires": [
     {
       "module": "stapel-core",

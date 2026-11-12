@@ -201,3 +201,34 @@ class TestStaffCodes:
         resp = staff_client.get(f"{V1}/staff/promotions/999/codes/")
         assert resp.status_code == 404 and err(resp) == "error.404.promotion_not_found"
         assert Promotion.objects.count() == 0
+
+
+class TestCodesBatchAndExport:
+    def test_codes_filter_by_batch(self, staff_client):
+        from stapel_promotions.models import PromoCode
+
+        p = make_promotion()
+        PromoCode.objects.create(promotion=p, code="A1", batch="b1")
+        PromoCode.objects.create(promotion=p, code="A2", batch="b2")
+        body = staff_client.get(f"{V1}/staff/promotions/{p.pk}/codes/?batch=b1").json()
+        assert [c["code"] for c in body["items"]] == ["A1"]
+
+    def test_export_streams_csv_with_safe_cells(self, staff_client):
+        import csv
+        import io
+
+        from stapel_promotions.models import PromoCode
+
+        p = make_promotion()
+        PromoCode.objects.create(promotion=p, code="SAFE1", batch="=HYPERLINK(1)", assigned_user_id="@7")
+        PromoCode.objects.create(promotion=p, code="OTHER", batch="b2")
+        r = staff_client.get(f"{V1}/staff/promotions/{p.pk}/codes/export/?batch==HYPERLINK(1)")
+        assert r.status_code == 200 and r.streaming and r["Content-Type"].startswith("text/csv")
+        rows = list(csv.reader(io.StringIO(b"".join(r.streaming_content).decode())))
+        assert rows[0] == ["code", "batch", "is_active", "usage_limit", "assigned_user_id", "created_at"]
+        assert [row[:5] for row in rows[1:]] == [["SAFE1", "'=HYPERLINK(1)", "true", "", "'@7"]]
+
+    def test_export_of_an_unknown_promotion_is_404_and_staff_only(self, staff_client, auth_client):
+        assert staff_client.get(f"{V1}/staff/promotions/999999/codes/export/").status_code == 404
+        p = make_promotion()
+        assert auth_client.get(f"{V1}/staff/promotions/{p.pk}/codes/export/").status_code == 403

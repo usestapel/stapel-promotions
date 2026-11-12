@@ -419,6 +419,14 @@
           },
           {
             "in": "query",
+            "name": "batch",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Only the codes of this generation batch."
+          },
+          {
+            "in": "query",
             "name": "direction",
             "schema": {
               "type": "string",
@@ -514,6 +522,50 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/PromoCodeResponse"
+                }
+              }
+            },
+            "description": ""
+          }
+        }
+      }
+    },
+    "/promotions/api/v1/staff/promotions/{promotion_id}/codes/export/": {
+      "get": {
+        "operationId": "promotions_staff_codes_export",
+        "description": "A promotion's codes as CSV, streamed; cells are formula-injection safe (staff).\n\n**Permissions:** `IsStaffUser`",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "batch",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Only the codes of this generation batch."
+          },
+          {
+            "in": "path",
+            "name": "promotion_id",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true
+          }
+        ],
+        "tags": [
+          "Promotions"
+        ],
+        "security": [
+          {
+            "JWTCookieAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "text/csv": {
+                "schema": {
+                  "type": "string"
                 }
               }
             },

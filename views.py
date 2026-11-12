@@ -4,6 +4,10 @@ Every view declares its guest stance. The two public reads admit anyone
 (the validate endpoint is throttled against code enumeration); the staff
 surface refuses guests and non-staff.
 """
+import csv
+
+from django.http import StreamingHttpResponse
+from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import permissions
 from rest_framework.throttling import SimpleRateThrottle
@@ -78,6 +82,9 @@ class _StaffView(_PromotionsView):
     permission_classes = [IsStaffUser]
     stapel_anonymous_access = ANONYMOUS_DENIED
 
+
+BATCH_PARAMETER = OpenApiParameter("batch", str, OpenApiParameter.QUERY, required=False,
+                                   description="Only the codes of this generation batch.")
 
 ANCHOR_PARAMETERS = [
     OpenApiParameter("anchor", str, OpenApiParameter.QUERY, required=False,
@@ -216,11 +223,11 @@ class StaffCodeListView(_StaffView):
     request_serializer_class = PromoCodeCreateRequestSerializer
     response_serializer_class = PromoCodeResponseSerializer
 
-    @extend_schema(operation_id="promotions_staff_codes_list", parameters=ANCHOR_PARAMETERS,
+    @extend_schema(operation_id="promotions_staff_codes_list", parameters=[*ANCHOR_PARAMETERS, BATCH_PARAMETER],
                    responses={200: PromoCodePageSerializer})
     @flow_step(MANAGE, order=6, note="Page through a promotion's codes")
     def get(self, request, promotion_id):
-        qs = staff_service.list_codes(promotion_id)
+        qs = staff_service.list_codes(promotion_id, request.query_params.get("batch") or None)
         return self._page(request, qs, get_code_presenter()().present_many)
 
     @extend_schema(operation_id="promotions_staff_codes_create", request=PromoCodeCreateRequestSerializer,
@@ -229,6 +236,28 @@ class StaffCodeListView(_StaffView):
     def post(self, request, promotion_id):
         code = staff_service.create_code(promotion_id, self.validated_request_data(request))
         return self.serialized_response(get_code_presenter()().present(code), status=201)
+
+
+class _EchoBuffer:
+    def write(self, value):
+        return value
+
+
+@extend_schema(tags=TAGS)
+class StaffCodeExportView(_StaffView):
+    """A promotion's codes as CSV, streamed; cells are formula-injection safe (staff)."""
+
+    @extend_schema(operation_id="promotions_staff_codes_export", parameters=[BATCH_PARAMETER],
+                   responses={(200, "text/csv"): OpenApiTypes.STR})
+    def get(self, request, promotion_id):
+        rows = staff_service.export_code_rows(promotion_id, request.query_params.get("batch") or None)
+        writer = csv.writer(_EchoBuffer())
+        response = StreamingHttpResponse(
+            (writer.writerow(row) for row in rows),
+            content_type="text/csv; charset=utf-8",
+        )
+        response["Content-Disposition"] = f'attachment; filename="promotion-{int(promotion_id)}-codes.csv"'
+        return response
 
 
 @extend_schema(tags=TAGS)
