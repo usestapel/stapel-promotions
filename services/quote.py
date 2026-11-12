@@ -116,7 +116,7 @@ def rule_of(p: Promotion) -> pricing.Rule:
 def code_of(c: PromoCode) -> pricing.Code:
     return pricing.Code(
         id=c.pk, code=c.code, is_active=c.is_active, usage_limit=c.usage_limit,
-        assigned_user_id=c.assigned_user_id,
+        assigned_user_id=c.assigned_user_id, revoked=c.revoked_at is not None,
     )
 
 

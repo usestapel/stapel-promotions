@@ -131,7 +131,7 @@ def test_every_function_and_fact_has_a_schema():
 
     schemas = REPO / "schemas"
     for name in ("promotions.quote", "promotions.reserve", "promotions.commit", "promotions.release",
-                 "promotions.codes.issue"):
+                 "promotions.codes.issue", "promotions.codes.revoke"):
         assert (schemas / "functions" / f"{name}.json").is_file()
         function_registry.get(name)
     for name in ("promotions.redemption.committed", "promotions.redemption.released",

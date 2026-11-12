@@ -31,7 +31,7 @@ from ..errors import (
 from ..models import KEY_MAX_LENGTH, PromoCode, Promotion, PromotionKind, PromotionScope, Redemption
 from . import PromotionsError
 from . import codes as code_text
-from .quote import count_usage, rule_of
+from .quote import code_of, count_usage, rule_of
 
 PROMOTION_FIELDS = (
     "key", "name", "description", "kind", "value", "currency", "max_discount", "min_subtotal",
@@ -238,8 +238,7 @@ def validate_code(raw_code: str, *, user_id: str | None, currency: str | None = 
     usage = count_usage([promotion.pk], [row.pk], user_id or "", now)
     candidate = pricing.Candidate(
         rule=rule_of(promotion),
-        code=pricing.Code(id=row.pk, code=row.code, is_active=row.is_active,
-                          usage_limit=row.usage_limit, assigned_user_id=row.assigned_user_id),
+        code=code_of(row),
         usage=pricing.Usage(total=usage["total"].get(promotion.pk, 0),
                             per_user=usage["user"].get(promotion.pk, 0),
                             per_code=usage["code"].get(row.pk, 0)),

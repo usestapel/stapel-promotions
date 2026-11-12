@@ -182,6 +182,9 @@ class PromoCodeResponseSerializer(serializers.Serializer):
     used = serializers.IntegerField(min_value=0, help_text="Committed uses.")
     assigned_user_id = serializers.CharField(max_length=m.USER_ID_MAX_LENGTH, allow_null=True)
     batch = serializers.CharField(max_length=m.BATCH_MAX_LENGTH, allow_null=True)
+    revoked_at = serializers.DateTimeField(default_timezone=UTC, allow_null=True,
+                                           help_text="Set when an issuer revoked the code; it never applies again.")
+    revoke_reason = serializers.CharField(max_length=m.REASON_MAX_LENGTH, allow_null=True)
     created_at = serializers.DateTimeField(default_timezone=UTC)
 
 

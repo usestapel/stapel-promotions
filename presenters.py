@@ -99,6 +99,7 @@ class PromoCodePresenter:
                 id=c.pk, promotion_id=c.promotion_id, code=c.code, is_active=c.is_active,
                 usage_limit=c.usage_limit, used=used.get(c.pk, 0),
                 assigned_user_id=_or_none(c.assigned_user_id), batch=_or_none(c.batch),
+                revoked_at=c.revoked_at, revoke_reason=_or_none(c.revoke_reason),
                 created_at=c.created_at,
             )
             for c in codes

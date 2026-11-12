@@ -2,7 +2,7 @@
 
 Promo codes and automatic discounts for a Stapel shop. Staff define promotions (percent off, a fixed amount off, or free shipping), scoped to the whole cart, one purchasable type or a list of purchasable keys, with a time window, a minimum subtotal, a stackable flag and usage caps in total and per shopper; codes are many per promotion, case-insensitive, single-use or shared, optionally bound to one shopper, and generated in bulk. Automatic promotions apply without a code. The brick plugs into stapel-orders by Function name only: promotions.quote is the discount adjuster (deterministic, no writes, one adjustment per promotion, free shipping as a marker the shipping adjuster honours) and promotions.reserve/commit/release is the checkout hook that ledgers each use under the promotion's row lock, so two shoppers racing for the last use end as one order and one promo_code_exhausted. Money is Decimal end to end; a discount never exceeds what it applies to.
 
-Contract: axes 1 · extension points 7 · operations 13 · error codes 65 · flows 2.
+Contract: axes 1 · extension points 7 · operations 13 · error codes 66 · flows 2.
 Generated from docs/capabilities.json by `stapel-llms-txt` — do not edit; drift-gated by `make contract-check`.
 
 ## Configuration axes — what a product switches on
@@ -48,7 +48,7 @@ Paths are relative to `/promotions/api/v1/`.
 - PATCH /staff/promotions/{promotion_id}/ — promotions_staff_promotions_update
 - GET /staff/promotions/{promotion_id}/redemptions/ — promotions_staff_redemptions_list
 
-## Error codes (65) — the StapelError envelope
+## Error codes (66) — the StapelError envelope
 Render `t(code, params)`; branch UX on the remediation. Localized text lives in docs/errors.<lang>.md, not here.
 - error.400.bad_request [400] fix_input
 - error.400.captcha_invalid [400] retry
@@ -100,6 +100,7 @@ Render `t(code, params)`; branch UX on the remediation. Localized text lives in 
 - error.409.promo_code_min_subtotal [409] fix_input {code,min_subtotal,currency}
 - error.409.promo_code_not_active [409] fix_input {code}
 - error.409.promo_code_not_applicable [409] fix_input {code}
+- error.409.promo_code_revoked [409] fix_input {code}
 - error.409.promo_code_taken [409] fix_input {code}
 - error.409.promo_code_user_limit_reached [409] fix_input {code}
 - error.409.promotion_exhausted [409] retry {label}

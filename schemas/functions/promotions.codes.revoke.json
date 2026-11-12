@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "promotions.codes.revoke",
+  "description": "Withdraw one issued code (e.g. a reversed referral reward), by code text (case-insensitive) or code_id. From then on validate, quote and reserve refuse it with error.409.promo_code_revoked; redemptions already committed are untouched. Idempotent: revoking a revoked code changes nothing and answers the same (the first reason is kept). Output: {code, code_id, revoked: true, already_revoked: bool, redeemed: bool (the code has committed redemptions), revoked_at}. An unknown code fails the call.",
+  "type": "object",
+  "properties": {
+    "code": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "code_id": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "reason": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64
+    }
+  },
+  "required": [
+    "reason"
+  ],
+  "oneOf": [
+    {
+      "required": [
+        "code"
+      ]
+    },
+    {
+      "required": [
+        "code_id"
+      ]
+    }
+  ],
+  "additionalProperties": false
+}

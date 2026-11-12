@@ -107,7 +107,8 @@ Presenter swap keys (`STAPEL_SWAP`): `STAPEL_PROMOTIONS_PROMOTION_PRESENTER`,
 | Function (provides) | `promotions.reserve` | request + `attempt_key` -> `{ok, token, errors}` | `schemas/functions/promotions.reserve.json` |
 | Function (provides) | `promotions.commit` | `{attempt_key, token?, order_id, user_id?}` -> `{ok, status}` | `schemas/functions/promotions.commit.json` |
 | Function (provides) | `promotions.release` | `{attempt_key, token?, order_id?, reason}` -> `{ok, status}` | `schemas/functions/promotions.release.json` |
-| Function (provides) | `promotions.codes.issue` | `{promotion_key, count?, assigned_user_id?, prefix?, usage_limit?}` -> `{promotion_key, codes}` | `schemas/functions/promotions.codes.issue.json` |
+| Function (provides) | `promotions.codes.issue` | `{promotion_key, count?, assigned_user_id?, prefix?, usage_limit?, idempotency_key?}` -> `{promotion_key, codes}`; with `idempotency_key` (unique, `CodeIssue` row inserted before minting) a retry answers the first call's codes and mints nothing, the key reused for another request fails the call | `schemas/functions/promotions.codes.issue.json` |
+| Function (provides) | `promotions.codes.revoke` | `{code \| code_id, reason}` -> `{code, code_id, revoked, already_revoked, redeemed, revoked_at}`; the code is refused from then on with `error.409.promo_code_revoked` (validate, quote, reserve — reserve re-reads it under the code row lock); committed redemptions untouched; idempotent (first reason kept); unknown code fails the call | `schemas/functions/promotions.codes.revoke.json` |
 | Action (emits) | `promotions.redemption.committed` | redemption, promotion, code, user, order, amount | `schemas/emits/…` |
 | Action (emits) | `promotions.redemption.released` | the same + `reason` | `schemas/emits/…` |
 | Action (emits) | `promotions.promotion.exhausted` | promotion, cap, used | `schemas/emits/…` |

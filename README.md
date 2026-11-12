@@ -29,7 +29,7 @@ pip install stapel-promotions
 | HTTP operations | 13 |
 | Config axes | 1 |
 | Extension points | 7 |
-| Error codes | 65 |
+| Error codes | 66 |
 | Documented flows | 2 |
 | Fleet dependencies | [`stapel-auth`](https://github.com/usestapel/stapel-auth) (optional) · [`stapel-core`](https://github.com/usestapel/stapel-core) · [`stapel-orders`](https://github.com/usestapel/stapel-orders) (optional) |
 
@@ -118,7 +118,7 @@ The shopper's codes travel in the orders checkout `context`:
 | PATCH/DELETE | `staff/codes/{id}/` | staff |
 
 Functions: `promotions.quote`, `promotions.reserve`, `promotions.commit`,
-`promotions.release`, `promotions.codes.issue`. Facts:
+`promotions.release`, `promotions.codes.issue`, `promotions.codes.revoke`. Facts:
 `promotions.redemption.committed`, `promotions.redemption.released`,
 `promotions.promotion.exhausted`. Settings: `CONFIG.MD`. Design:
 `docs/SPEC.md`. Extension points: `MODULE.md`.

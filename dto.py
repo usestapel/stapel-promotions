@@ -99,6 +99,8 @@ class PromoCodeDTO:
     used: int
     assigned_user_id: Optional[str]
     batch: Optional[str]
+    revoked_at: Optional[datetime.datetime]
+    revoke_reason: Optional[str]
     created_at: datetime.datetime
 
 

@@ -79,7 +79,7 @@ The shopper's codes travel in the orders checkout `context`:
 | PATCH/DELETE | `staff/codes/{id}/` | staff |
 
 Functions: `promotions.quote`, `promotions.reserve`, `promotions.commit`,
-`promotions.release`, `promotions.codes.issue`. Facts:
+`promotions.release`, `promotions.codes.issue`, `promotions.codes.revoke`. Facts:
 `promotions.redemption.committed`, `promotions.redemption.released`,
 `promotions.promotion.exhausted`. Settings: `CONFIG.MD`. Design:
 `docs/SPEC.md`. Extension points: `MODULE.md`.
