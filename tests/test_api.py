@@ -59,6 +59,19 @@ class TestPublic:
                  for i in range(4)]
         assert codes == [200, 200, 200, 429]
 
+    def test_a_throttled_validate_says_when_to_retry(self, anon_client, settings):
+        """429 carries the Retry-After header and the same seconds in params
+        (core's envelope names it ``retry_after``), so a countdown can render."""
+        settings.STAPEL_PROMOTIONS = {"VALIDATE_RATE": "1/min"}
+        anon_client.post(f"{V1}/codes/validate/", {"code": "X0"}, format="json")
+        refused = anon_client.post(f"{V1}/codes/validate/", {"code": "X1"}, format="json")
+        assert refused.status_code == 429
+        wait = int(refused["Retry-After"])
+        assert 0 < wait <= 60
+        body = refused.json()
+        assert body["localizable_error"].startswith("error.429.")
+        assert body["params"]["retry_after"] == wait
+
 
 class TestStaffGuard:
     @pytest.mark.parametrize("path", ["/staff/promotions/", "/staff/promotions/1/", "/staff/promotions/1/codes/",
