@@ -29,6 +29,7 @@ from ..models import (
     ATTEMPT_KEY_MAX_LENGTH,
     ORDER_ID_MAX_LENGTH,
     REASON_MAX_LENGTH,
+    USER_ID_MAX_LENGTH,
     PromoCode,
     Redemption,
     RedemptionAttempt,
@@ -51,6 +52,14 @@ def _attempt_key(payload) -> str:
     if not isinstance(key, str) or not key or len(key) > ATTEMPT_KEY_MAX_LENGTH:
         raise PayloadInvalid("attempt_key must be a non-empty string")
     return key
+
+
+def actor_of(payload: dict) -> str:
+    """The row owner: ``actor_id`` (a guest's own id too), else ``user_id`` (older orders)."""
+    raw = payload.get("actor_id") or payload.get("user_id") or ""
+    if len(str(raw)) > USER_ID_MAX_LENGTH:
+        raise PayloadInvalid("actor_id is longer than 64")
+    return str(raw)
 
 
 def _ttl() -> dt.timedelta:
@@ -106,6 +115,7 @@ def reserve(payload: dict, *, now: dt.datetime | None = None) -> dict:
     now = now or timezone.now()
     key = _attempt_key(payload)
     request = parse_request(payload)
+    actor = actor_of(payload)
     granted = grants(request)
     existing = find_attempt(key)
     if existing is not None and existing.status in LIVE:
@@ -141,13 +151,13 @@ def reserve(payload: dict, *, now: dt.datetime | None = None) -> dict:
                     errors.append(refusal)
             if errors:
                 return {"ok": False, "token": None, "errors": errors}
-            attempt = _write_attempt(attempt, key, request, now)
+            attempt = _write_attempt(attempt, key, request, actor, now)
             codes = {c.code: c for c in PromoCode.objects.filter(code__in=list(by_code))}
             Redemption.objects.bulk_create([
                 Redemption(
                     attempt=attempt, promotion_id=pid,
                     code=codes.get(grant["code"]) if grant["code"] else None,
-                    user_id=attempt.user_id, status=RedemptionStatus.RESERVED,
+                    user_id=attempt.user_id, actor_id=attempt.actor_id, status=RedemptionStatus.RESERVED,
                     amount=grant["amount"], currency=cart.currency,
                     free_shipping=grant["free_shipping"],
                 )
@@ -162,10 +172,11 @@ def reserve(payload: dict, *, now: dt.datetime | None = None) -> dict:
     return _answer(attempt)
 
 
-def _write_attempt(attempt, key: str, request: Request, now: dt.datetime) -> RedemptionAttempt:
+def _write_attempt(attempt, key: str, request: Request, actor: str, now: dt.datetime) -> RedemptionAttempt:
     fields = {
         "token": secrets.token_hex(16),
         "user_id": request.cart.user_id or "",
+        "actor_id": actor,
         "status": RedemptionStatus.RESERVED,
         "currency": request.cart.currency,
         "result": {"adjustments": request.own_adjustments},
@@ -213,8 +224,10 @@ def commit(payload: dict) -> dict:
         rows = _rows(attempt)
         attempt.status = RedemptionStatus.COMMITTED
         attempt.order_id = order_id or attempt.order_id
-        attempt.save(update_fields=["status", "order_id", "updated_at"])
-        Redemption.objects.filter(attempt=attempt).update(status=RedemptionStatus.COMMITTED, updated_at=timezone.now())
+        attempt.actor_id = attempt.actor_id or actor_of(payload)
+        attempt.save(update_fields=["status", "order_id", "actor_id", "updated_at"])
+        Redemption.objects.filter(attempt=attempt).update(status=RedemptionStatus.COMMITTED,
+                                                          actor_id=attempt.actor_id, updated_at=timezone.now())
         for row in rows:
             row.status = RedemptionStatus.COMMITTED
             emit(events.EVENT_COMMITTED, events.redemption_payload(row, attempt), key=str(row.promotion_id))
@@ -297,11 +310,27 @@ def purge_attempts(now: dt.datetime | None = None) -> int:
     return deleted
 
 
+def reassign_owner(manager, old: str, new: str) -> int:
+    """Rewrite ``old`` to ``new`` in ``user_id`` and ``actor_id``; counts rows touched."""
+    from django.db.models import Q
+
+    ids = list(manager.filter(Q(user_id=old) | Q(actor_id=old)).values_list("pk", flat=True))
+    if ids:
+        manager.filter(pk__in=ids, user_id=old).update(user_id=new)
+        manager.filter(pk__in=ids, actor_id=old).update(actor_id=new)
+    return len(ids)
+
+
 def merge_users(from_user_id: str, into_user_id: str) -> dict:
-    """``user.merged``: the guest's ledger and assigned codes follow the account."""
+    """``user.merged``: the guest's ledger and assigned codes follow the account.
+
+    Rows move by ``actor_id`` (a guest's rows carry a blank ``user_id``) and by
+    ``user_id``; a guest's ``user_id`` stays blank, so per-user caps of the
+    account count only what the account redeemed as itself.
+    """
     return {
-        "redemptions": Redemption.objects.filter(user_id=from_user_id).update(user_id=into_user_id),
-        "attempts": RedemptionAttempt.objects.filter(user_id=from_user_id).update(user_id=into_user_id),
+        "redemptions": reassign_owner(Redemption.objects, from_user_id, into_user_id),
+        "attempts": reassign_owner(RedemptionAttempt.objects, from_user_id, into_user_id),
         "codes": PromoCode.objects.filter(assigned_user_id=from_user_id).update(assigned_user_id=into_user_id),
     }
 
@@ -317,6 +346,6 @@ def usage_of(promotion_id: int, now: dt.datetime | None = None) -> dict:
 
 
 __all__ = [
-    "commit", "expire_reservations", "grants", "merge_users", "purge_attempts", "release",
-    "reserve", "usage_of",
+    "actor_of", "commit", "expire_reservations", "grants", "merge_users", "purge_attempts",
+    "reassign_owner", "release", "reserve", "usage_of",
 ]

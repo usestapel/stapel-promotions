@@ -41,11 +41,13 @@ foreign key leaves the app.
   `assigned_user_id` (blank = anyone; set = only that user, e.g. a referral
   reward), `batch` (generation batch id), timestamps.
 - **`RedemptionAttempt`** — `attempt_key` ≤128 unique (the orders checkout
-  idempotency key), `token`, `user_id`, `status` (`reserved` | `committed` |
+  idempotency key), `token`, `user_id` (blank for a guest), `actor_id`
+  (the acting account, a guest's own id too), `status` (`reserved` | `committed` |
   `released` | `expired`), `currency`, `result` (the adjustments reserved),
   `order_id`, `expires_at`, timestamps.
 - **`Redemption`** (the ledger) — `attempt` FK, `promotion` FK (PROTECT),
-  `code` FK nullable, `user_id`, `status` (same four), `amount` Decimal(18,2)
+  `code` FK nullable, `user_id` (blank for a guest; what per-user caps
+  count), `actor_id` (who owns the row), `status` (same four), `amount` Decimal(18,2)
   (positive: the discount granted), `currency`, `free_shipping`, timestamps.
   Unique `(attempt, promotion)`.
 
@@ -195,10 +197,20 @@ Orders wiring: `stapel_promotions.preset.SETTINGS_DEFAULTS` carries the
 without the checkout hook (caps would never be enforced); `E002` code space
 too small. Without orders installed every check is silent.
 
+**Ownership (`actor_id`).** Orders sends `actor_id` (the acting account,
+a guest's own id included, always present) next to `user_id` (null for a
+guest on every payload). Per-user caps read `user_id` only, so they still
+refuse a guest; reserve records `actor_id` on the attempt and its ledger
+rows (payloads without it record `user_id`; a commit fills a blank one).
+`user.merged` moves rows by `user_id` and by `actor_id` — a guest's rows
+keep a blank `user_id`, so they never count toward the account's per-user
+caps.
+
 GDPR (`register_gdpr_owner("promotions", ["account"], erase)`): ledger and
-attempts keep amounts, `user_id` becomes the fleet pseudonym (per-user caps
-keep counting); assigned codes are pseudonymized and deactivated;
-`created_by` pseudonymized. Export = ledger rows and assigned codes.
+attempts keep amounts, `user_id` and `actor_id` become the fleet pseudonym
+(per-user caps keep counting); assigned codes are pseudonymized and
+deactivated; `created_by` pseudonymized. Export = ledger rows (by `user_id`
+or `actor_id`) and assigned codes.
 
 ## 8. Switches parked for the foreman
 

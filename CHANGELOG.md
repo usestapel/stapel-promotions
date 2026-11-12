@@ -37,6 +37,11 @@ First release: promo codes and automatic discounts over opaque purchasables.
   `cancelled` release undoes a committed attempt; `checkout_failed` /
   `orphaned` on it answer ok and keep the use, and a commit after a cancel
   is a no-op.
+- **Ownership by `actor_id`**: the hook payloads may carry `actor_id` (the
+  acting account, a guest's own id too) next to `user_id` (null for a
+  guest); attempts and ledger rows record it (`user_id` when absent);
+  per-user caps still read `user_id` and refuse a guest; `user.merged` and
+  GDPR export/erase cover rows keyed by `actor_id`.
 - **API** under `/promotions/api/v1/`: `active/`, throttled
   `codes/validate/`, staff CRUD for promotions and codes, ledger pages.
 - `promotions.codes.issue` Function (referral rewards), `user.merged`

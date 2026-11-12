@@ -2,9 +2,10 @@
 
 Erasure of an ``account``:
 
-- ledger rows and attempts keep amounts and statuses; ``user_id`` becomes
-  the fleet pseudonym (``stapel_core.gdpr.pseudonymize``), so the per-user
-  caps of the erased person still count under one stable id;
+- ledger rows and attempts keep amounts and statuses; ``user_id`` and
+  ``actor_id`` (the acting account, a guest's own id too) become the fleet
+  pseudonym (``stapel_core.gdpr.pseudonymize``), so the per-user caps of
+  the erased person still count under one stable id;
 - codes assigned to the person are deactivated and their assignment is
   pseudonymized (nobody can use them any more);
 - ``created_by`` on promotions (a staff id) is pseudonymized.
@@ -22,6 +23,8 @@ class PromotionsGDPRProvider(GDPRProvider):
     section = "promotions"
 
     def export(self, user_id) -> dict:
+        from django.db.models import Q
+
         from .models import PromoCode, Redemption
 
         user_id = str(user_id)
@@ -37,7 +40,8 @@ class PromotionsGDPRProvider(GDPRProvider):
                     "order_id": r.attempt.order_id or None,
                     "created_at": r.created_at.isoformat(),
                 }
-                for r in Redemption.objects.filter(user_id=user_id).select_related("promotion", "code", "attempt")
+                for r in Redemption.objects.filter(Q(user_id=user_id) | Q(actor_id=user_id))
+                .select_related("promotion", "code", "attempt").order_by("id")
             ],
             "assigned_codes": [
                 {"code": c.code, "promotion": c.promotion.key, "is_active": c.is_active}
@@ -63,14 +67,15 @@ def erase_subject(subject_type, subject_key, workspace_id=None):
     from stapel_core.gdpr.owners import pseudonymize
 
     from .models import PromoCode, Promotion, Redemption, RedemptionAttempt
+    from .services.redemption import reassign_owner
 
     if subject_type != "account" or not subject_key:
         return None
     user_id = str(subject_key)
     alias = pseudonymize(user_id)
     with transaction.atomic():
-        redemptions = Redemption.objects.filter(user_id=user_id).update(user_id=alias)
-        attempts = RedemptionAttempt.objects.filter(user_id=user_id).update(user_id=alias)
+        redemptions = reassign_owner(Redemption.objects, user_id, alias)
+        attempts = reassign_owner(RedemptionAttempt.objects, user_id, alias)
         codes = PromoCode.objects.filter(assigned_user_id=user_id).update(assigned_user_id=alias, is_active=False)
         promotions = Promotion.objects.filter(created_by=user_id).update(created_by=alias)
     return {"redemptions": redemptions, "attempts": attempts, "assigned_codes": codes,

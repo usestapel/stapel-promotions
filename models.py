@@ -154,6 +154,8 @@ class RedemptionAttempt(models.Model):
     token = models.CharField(max_length=TOKEN_MAX_LENGTH, unique=True, help_text="Opaque token handed to orders.")
     user_id = models.CharField(max_length=USER_ID_MAX_LENGTH, blank=True, default="", db_index=True,
                                help_text="Shopper id; blank for a guest.")
+    actor_id = models.CharField(max_length=USER_ID_MAX_LENGTH, blank=True, default="", db_index=True,
+                                help_text="Acting account (a guest's own id too); owns the row.")
     status = models.CharField(max_length=16, choices=RedemptionStatus.choices, default=RedemptionStatus.RESERVED,
                               help_text="Ledger state of every row of this attempt.")
     currency = models.CharField(max_length=CURRENCY_MAX_LENGTH, blank=True, default="", help_text="Cart currency.")
@@ -186,6 +188,8 @@ class Redemption(models.Model):
                              help_text="The code used; null for an automatic promotion.")
     user_id = models.CharField(max_length=USER_ID_MAX_LENGTH, blank=True, default="",
                                help_text="Shopper id (pseudonym after erasure); blank for a guest.")
+    actor_id = models.CharField(max_length=USER_ID_MAX_LENGTH, blank=True, default="",
+                                help_text="Acting account (a guest's own id too; pseudonym after erasure).")
     status = models.CharField(max_length=16, choices=RedemptionStatus.choices, default=RedemptionStatus.RESERVED,
                               help_text="reserved, committed, released or expired.")
     amount = models.DecimalField(
@@ -207,6 +211,7 @@ class Redemption(models.Model):
             models.Index(fields=["promotion", "status"], name="promotions_red_promo_status"),
             models.Index(fields=["promotion", "user_id", "status"], name="promotions_red_promo_user"),
             models.Index(fields=["user_id"], name="promotions_red_user"),
+            models.Index(fields=["actor_id"], name="promotions_red_actor"),
         ]
 
     def __str__(self) -> str:

@@ -78,7 +78,10 @@ exactly the adjustments with `meta.issuer == "promotions"` (amount per
 promotion), re-checks each under the row lock, and refuses with
 `error.409.promo_code_exhausted` / `error.409.promotion_exhausted` when one
 no longer holds. Guests (`user_id: null`) are refused a code with a
-per-user cap (`error.403.promo_code_requires_account`).
+per-user cap (`error.403.promo_code_requires_account`). The payloads'
+`actor_id` (the acting account, a guest's own id too) is recorded on the
+attempt and ledger rows as their owner (`user_id` when absent);
+`user.merged` and GDPR export/erase follow it.
 
 ### Serializer seams (`views.py`)
 

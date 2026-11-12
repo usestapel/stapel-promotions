@@ -30,6 +30,14 @@
       ],
       "maxLength": 64,
       "description": "checkout_failed | cancelled | orphaned"
+    },
+    "actor_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 64,
+      "description": "The acting account id (a guest's own id, or the account), always sent by orders that know it; user_id stays null for a guest. Owner of this brick's rows; absent from older orders payloads."
     }
   },
   "required": [
