@@ -158,6 +158,19 @@
         "note": "The total cap is reached",
         "note_key": "flow.promotions.manage.step.12.note",
         "ref": "promotions.promotion.exhausted"
+      },
+      {
+        "kind": "http",
+        "order": 12,
+        "note": "Export a promotion's codes as CSV",
+        "note_key": "flow.promotions.manage.step.12.note",
+        "ref": "stapel_promotions.views.StaffCodeExportView.get",
+        "endpoints": [
+          {
+            "method": "GET",
+            "path": "/promotions/api/v1/staff/promotions/<int:promotion_id>/codes/export/"
+          }
+        ]
       }
     ]
   },

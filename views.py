@@ -249,6 +249,7 @@ class StaffCodeExportView(_StaffView):
 
     @extend_schema(operation_id="promotions_staff_codes_export", parameters=[BATCH_PARAMETER],
                    responses={(200, "text/csv"): OpenApiTypes.STR})
+    @flow_step(MANAGE, order=12, note="Export a promotion's codes as CSV")
     def get(self, request, promotion_id):
         rows = staff_service.export_code_rows(promotion_id, request.query_params.get("batch") or None)
         writer = csv.writer(_EchoBuffer())
