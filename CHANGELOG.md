@@ -11,6 +11,9 @@ Pre-1.0 semver: **minor = breaking**, patch = compatible.
 First release: promo codes and automatic discounts over opaque purchasables.
 
 ### Added
+- Error translations `translations/errors.{ru,es}.json` (from the React
+  pair's catalogue) in the wheel, gated by `tests/test_error_i18n.py`
+  (coverage, placeholders, byte form, package-data).
 - Orders seam gate `tests/test_orders_seam.py`: payloads validated against
   orders' own Function schemas (fixtures pinned by orders sha), then against
   ours, then sent through comm; answers validated against orders' result
