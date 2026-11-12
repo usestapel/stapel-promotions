@@ -11,6 +11,10 @@ Pre-1.0 semver: **minor = breaking**, patch = compatible.
 First release: promo codes and automatic discounts over opaque purchasables.
 
 ### Added
+- README wiring snippets in the merge forms (the scaffold's
+  `_stapel_merge_preset_defaults` list, or a per-key hand merge); pasting
+  them never drops the host's `STAPEL_ORDERS` keys — executed against a
+  populated settings module by `tests/test_readme_wiring.py`.
 - **Promotions**: percent (with `max_discount`), fixed (one currency) and
   free shipping; scope cart / purchasable type / key set; `[starts_at,
   ends_at)` window; `min_subtotal`; stackable flag and priority; usage caps

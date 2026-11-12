@@ -18,23 +18,40 @@ INSTALLED_APPS = [
     "stapel_promotions",
 ]
 
-# Next to stapel-orders: paste the shipped fragment (a scaffold that merges
-# companion presets does this for you).
-from stapel_promotions.preset import SETTINGS_DEFAULTS as _PROMOTIONS
-
-STAPEL_ORDERS = {
-    **STAPEL_ORDERS,
-    "ADJUSTERS": {**_PROMOTIONS["STAPEL_ORDERS"]["ADJUSTERS"], **STAPEL_ORDERS.get("ADJUSTERS", {})},
-    "CHECKOUT_HOOKS": {**_PROMOTIONS["STAPEL_ORDERS"]["CHECKOUT_HOOKS"],
-                       **STAPEL_ORDERS.get("CHECKOUT_HOOKS", {})},
-}
-
 # urls.py
 path("promotions/api/", include("stapel_promotions.urls"))   # -> /promotions/api/v1/...
 
 # settings.py — expire lapsed holds, purge old attempts (Celery optional)
 from stapel_promotions.beat import get_promotions_beat_schedule
 CELERY_BEAT_SCHEDULE = {**get_promotions_beat_schedule()}
+```
+
+Wire it into the orders checkout. A scaffolded project already calls the
+merge helper in `settings.py`: add this brick's preset to that list (the
+helper merges two levels deep, so other presets and your own keys stay):
+
+<!-- orders-wiring:scaffold -->
+```python
+_stapel_merge_preset_defaults(globals(), [
+    # ... the presets already listed (stapel_shop.preset, other companions),
+    "stapel_promotions.preset",
+])
+```
+
+A hand-wired project merges per key instead — **never assign**
+`STAPEL_ORDERS = {...}`: pasted after another fragment it would drop that
+fragment and the host's `PURCHASABLE_TYPES`:
+
+<!-- orders-wiring:hand -->
+```python
+from stapel_promotions.preset import SETTINGS_DEFAULTS as _PROMOTIONS
+
+STAPEL_ORDERS = globals().get("STAPEL_ORDERS") or {}
+STAPEL_ORDERS = {
+    **STAPEL_ORDERS,
+    "ADJUSTERS": {**_PROMOTIONS["STAPEL_ORDERS"]["ADJUSTERS"], **STAPEL_ORDERS.get("ADJUSTERS", {})},
+    "CHECKOUT_HOOKS": {**_PROMOTIONS["STAPEL_ORDERS"]["CHECKOUT_HOOKS"], **STAPEL_ORDERS.get("CHECKOUT_HOOKS", {})},
+}
 ```
 
 The shopper's codes travel in the orders checkout `context`:
