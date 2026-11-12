@@ -168,7 +168,7 @@ Input = the orders adjuster request. Money is `Decimal` parsed from strings
 | `GET/POST staff/promotions/` | staff | `?kind=&active=&q=` anchor page → `PromotionPage`; `PromotionWriteRequest` → `201 PromotionResponse` |
 | `GET/PATCH/DELETE staff/promotions/{id}/` | staff | `PromotionResponse`; delete refused `409 promotion_has_redemptions` once used (deactivate instead) |
 | `GET/POST staff/promotions/{id}/codes/` | staff | `PromoCodePage`; `PromoCodeCreateRequest` → `201 PromoCodeResponse` |
-| `GET staff/promotions/{id}/codes/export/` | staff | `?batch=` → streamed `text/csv` (`code, batch, is_active, usage_limit, assigned_user_id, created_at`; a cell starting with `= + - @` TAB CR is prefixed with `'`) |
+| `GET staff/promotions/{id}/codes/export/` | staff | `?batch=` → streamed `text/csv` (`code, batch, is_active, usage_limit, assigned_user_id, created_at, revoked_at, revoke_reason`; a cell starting with `= + - @` TAB CR is prefixed with `'`) |
 | `POST staff/promotions/{id}/codes/generate/` | staff | `CodeGenerateRequest {count ≤ GENERATE_MAX_PER_CALL, prefix?, length?, usage_limit?}` → `201 CodeGenerateResponse {batch, created, codes}` |
 | `PATCH/DELETE staff/codes/{id}/` | staff | `PromoCodeUpdateRequest {is_active?, usage_limit?}` → `PromoCodeResponse`; delete refused once used |
 | `GET staff/promotions/{id}/redemptions/` | staff | anchor page → `RedemptionPage` |

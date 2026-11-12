@@ -149,7 +149,10 @@ def list_codes(promotion_id, batch: str | None = None):
 
 
 #: Columns of the staff CSV export of a promotion's codes.
-CODE_EXPORT_COLUMNS = ("code", "batch", "is_active", "usage_limit", "assigned_user_id", "created_at")
+CODE_EXPORT_COLUMNS = (
+    "code", "batch", "is_active", "usage_limit", "assigned_user_id", "created_at",
+    "revoked_at", "revoke_reason",
+)
 #: A spreadsheet reads a cell starting with one of these as a formula.
 _FORMULA_LEADS = ("=", "+", "-", "@", "\t", "\r")
 
@@ -175,6 +178,7 @@ def export_code_rows(promotion_id, batch: str | None = None):
                 code.code, code.batch, "true" if code.is_active else "false",
                 "" if code.usage_limit is None else code.usage_limit,
                 code.assigned_user_id, code.created_at.isoformat(),
+                code.revoked_at.isoformat() if code.revoked_at else "", code.revoke_reason,
             )]
 
     return rows()

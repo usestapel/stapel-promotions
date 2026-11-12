@@ -225,7 +225,8 @@ class TestCodesBatchAndExport:
         r = staff_client.get(f"{V1}/staff/promotions/{p.pk}/codes/export/?batch==HYPERLINK(1)")
         assert r.status_code == 200 and r.streaming and r["Content-Type"].startswith("text/csv")
         rows = list(csv.reader(io.StringIO(b"".join(r.streaming_content).decode())))
-        assert rows[0] == ["code", "batch", "is_active", "usage_limit", "assigned_user_id", "created_at"]
+        assert rows[0] == ["code", "batch", "is_active", "usage_limit", "assigned_user_id", "created_at",
+                           "revoked_at", "revoke_reason"]
         assert [row[:5] for row in rows[1:]] == [["SAFE1", "'=HYPERLINK(1)", "true", "", "'@7"]]
 
     def test_export_of_an_unknown_promotion_is_404_and_staff_only(self, staff_client, auth_client):

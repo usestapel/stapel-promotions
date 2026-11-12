@@ -12,7 +12,8 @@ First release: promo codes and automatic discounts over opaque purchasables.
 
 ### Added
 - Staff codes list filters by `?batch=`; `GET staff/promotions/{id}/codes/export/`
-  streams a promotion's codes as CSV with formula-injection-safe cells.
+  streams a promotion's codes as CSV with formula-injection-safe cells;
+  `revoked_at` and `revoke_reason` columns mark a revoked code.
 - `error.409.promotion_exhausted` carries `code` next to `label` when the
   refused grant came from a promo code.
 - `error.400.promo_code_format_invalid` states the rule the code applies:
