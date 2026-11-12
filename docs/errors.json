@@ -444,6 +444,16 @@
     "owner": "stapel_promotions"
   },
   {
+    "code": "error.409.promo_code_revoked",
+    "status": 409,
+    "params": [
+      "code"
+    ],
+    "remediation": "fix_input",
+    "en": "Promo code {code} has been withdrawn",
+    "owner": "stapel_promotions"
+  },
+  {
     "code": "error.409.promo_code_taken",
     "status": 409,
     "params": [

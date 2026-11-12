@@ -1068,6 +1068,17 @@
             "nullable": true,
             "maxLength": 32
           },
+          "revoked_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "Set when an issuer revoked the code; it never applies again."
+          },
+          "revoke_reason": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 64
+          },
           "created_at": {
             "type": "string",
             "format": "date-time"
@@ -1081,6 +1092,8 @@
           "id",
           "is_active",
           "promotion_id",
+          "revoke_reason",
+          "revoked_at",
           "usage_limit",
           "used"
         ]

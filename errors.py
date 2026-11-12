@@ -21,6 +21,7 @@ ERR_404_PROMOTION_NOT_FOUND = "error.404.promotion_not_found"
 ERR_404_PROMO_CODE_NOT_FOUND = "error.404.promo_code_not_found"
 ERR_409_PROMO_CODE_NOT_ACTIVE = "error.409.promo_code_not_active"
 ERR_409_PROMO_CODE_EXHAUSTED = "error.409.promo_code_exhausted"
+ERR_409_PROMO_CODE_REVOKED = "error.409.promo_code_revoked"
 ERR_409_PROMO_CODE_USER_LIMIT_REACHED = "error.409.promo_code_user_limit_reached"
 ERR_409_PROMO_CODE_MIN_SUBTOTAL = "error.409.promo_code_min_subtotal"
 ERR_409_PROMO_CODE_NOT_APPLICABLE = "error.409.promo_code_not_applicable"
@@ -48,6 +49,7 @@ STAPEL_PROMOTIONS_ERRORS = {
     ERR_404_PROMO_CODE_NOT_FOUND: "Promo code not found",
     ERR_409_PROMO_CODE_NOT_ACTIVE: "Promo code {code} is not active",
     ERR_409_PROMO_CODE_EXHAUSTED: "Promo code {code} has been used up",
+    ERR_409_PROMO_CODE_REVOKED: "Promo code {code} has been withdrawn",
     ERR_409_PROMO_CODE_USER_LIMIT_REACHED: "You have already used promo code {code}",
     ERR_409_PROMO_CODE_MIN_SUBTOTAL: "Promo code {code} needs an order of at least {min_subtotal} {currency}",
     ERR_409_PROMO_CODE_NOT_APPLICABLE: "Promo code {code} does not apply to this order",
@@ -64,6 +66,7 @@ STAPEL_PROMOTIONS_REMEDIATION = {
     ERR_403_PROMO_CODE_REQUIRES_ACCOUNT: "reauthenticate",
     ERR_409_PROMO_CODE_NOT_ACTIVE: "fix_input",
     ERR_409_PROMO_CODE_EXHAUSTED: "fix_input",
+    ERR_409_PROMO_CODE_REVOKED: "fix_input",
     ERR_409_PROMO_CODE_USER_LIMIT_REACHED: "fix_input",
     ERR_409_PROMO_CODE_MIN_SUBTOTAL: "fix_input",
     ERR_409_PROMO_CODE_NOT_APPLICABLE: "fix_input",

@@ -18,6 +18,7 @@ from .errors import (
     ERR_409_PROMO_CODE_MIN_SUBTOTAL,
     ERR_409_PROMO_CODE_NOT_ACTIVE,
     ERR_409_PROMO_CODE_NOT_APPLICABLE,
+    ERR_409_PROMO_CODE_REVOKED,
     ERR_409_PROMO_CODE_USER_LIMIT_REACHED,
 )
 
@@ -94,6 +95,7 @@ class Code:
     is_active: bool = True
     usage_limit: int | None = None
     assigned_user_id: str = ""
+    revoked: bool = False
 
 
 @dataclass(frozen=True)
@@ -195,6 +197,8 @@ def check(candidate: Candidate, cart: Cart, now: dt.datetime, *, scope: bool = T
     """
     rule, code = candidate.rule, candidate.code
     label = {"code": candidate.adjustment_code}
+    if code is not None and code.revoked:
+        return ERR_409_PROMO_CODE_REVOKED, label
     if not rule.is_active or not _in_window(rule, now) or (code is not None and not code.is_active):
         return ERR_409_PROMO_CODE_NOT_ACTIVE, label
     needs_currency = rule.kind == FIXED or rule.min_subtotal is not None

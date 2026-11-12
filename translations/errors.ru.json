@@ -17,6 +17,7 @@
   "error.409.promo_code_min_subtotal": "Промокод {code} действует при заказе от {min_subtotal} {currency}",
   "error.409.promo_code_not_active": "Промокод {code} сейчас не действует",
   "error.409.promo_code_not_applicable": "Промокод {code} не подходит к этому заказу",
+  "error.409.promo_code_revoked": "Промокод {code} отозван",
   "error.409.promo_code_taken": "Промокод {code} уже существует",
   "error.409.promo_code_user_limit_reached": "Вы уже использовали промокод {code}",
   "error.409.promotion_exhausted": "Акция «{label}» только что закончилась; проверьте заказ",

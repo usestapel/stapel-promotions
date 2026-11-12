@@ -17,6 +17,7 @@
   "error.409.promo_code_min_subtotal": "El código promocional {code} requiere un pedido de al menos {min_subtotal} {currency}",
   "error.409.promo_code_not_active": "El código promocional {code} no está activo",
   "error.409.promo_code_not_applicable": "El código promocional {code} no se aplica a este pedido",
+  "error.409.promo_code_revoked": "El código promocional {code} ha sido retirado",
   "error.409.promo_code_taken": "El código promocional {code} ya existe",
   "error.409.promo_code_user_limit_reached": "Ya has usado el código promocional {code}",
   "error.409.promotion_exhausted": "La promoción {label} acaba de terminar; revisa tu pedido",

@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "promotions.codes.issue",
-  "description": "Mint new unique codes of an existing promotion, e.g. a referral reward. Output: {promotion_key, codes: [string]}. Unknown promotion_key fails the call.",
+  "description": "Mint new unique codes of an existing promotion, e.g. a referral reward. Output: {promotion_key, codes: [string]}. Unknown promotion_key fails the call. idempotency_key (optional, namespaced by the caller, e.g. 'referrals:reward:<id>'): a retry with the same key answers the codes the first call minted and mints nothing; the same key with a different request fails the call. Without it every call mints.",
   "type": "object",
   "properties": {
     "promotion_key": {
@@ -30,6 +30,11 @@
         "null"
       ],
       "minimum": 1
+    },
+    "idempotency_key": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
     }
   },
   "required": [

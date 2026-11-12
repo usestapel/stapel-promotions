@@ -25,6 +25,7 @@ CURRENCY_MAX_LENGTH = 3
 PURCHASABLE_TYPE_MAX_LENGTH = 32
 PURCHASABLE_KEY_MAX_LENGTH = 255
 ATTEMPT_KEY_MAX_LENGTH = 128
+ISSUE_KEY_MAX_LENGTH = 128
 TOKEN_MAX_LENGTH = 64
 ORDER_ID_MAX_LENGTH = 64
 BATCH_MAX_LENGTH = 32
@@ -134,6 +135,12 @@ class PromoCode(models.Model):
     )
     batch = models.CharField(max_length=BATCH_MAX_LENGTH, blank=True, default="", db_index=True,
                              help_text="Generation batch id; blank for a hand-made code.")
+    revoked_at = models.DateTimeField(
+        null=True, blank=True,
+        help_text="Set once by promotions.codes.revoke; a revoked code never applies again.",
+    )
+    revoke_reason = models.CharField(max_length=REASON_MAX_LENGTH, blank=True, default="",
+                                     help_text="Why the issuer took the code back (first revoke wins).")
     created_at = models.DateTimeField(auto_now_add=True, help_text="When the row was first written.")
     updated_at = models.DateTimeField(auto_now=True, help_text="Last save.")
 
@@ -143,6 +150,31 @@ class PromoCode(models.Model):
 
     def __str__(self) -> str:
         return self.code
+
+
+@access.ops
+class CodeIssue(models.Model):
+    """One ``promotions.codes.issue`` call keyed by the caller's idempotency key.
+
+    The unique key is the replay guard: a retry after a lost answer finds this
+    row and answers with the codes of its batch instead of minting again.
+    """
+
+    idempotency_key = models.CharField(max_length=ISSUE_KEY_MAX_LENGTH, unique=True,
+                                       help_text="The caller's retry key (namespaced by the caller).")
+    promotion = models.ForeignKey(Promotion, on_delete=models.CASCADE, related_name="issues",
+                                  help_text="The promotion the codes were minted for.")
+    fingerprint = models.CharField(max_length=64, help_text="sha256 of the request; a reused key with "
+                                                            "another request is refused.")
+    batch = models.CharField(max_length=BATCH_MAX_LENGTH, blank=True, default="",
+                             help_text="Batch of the minted codes.")
+    created_at = models.DateTimeField(auto_now_add=True, help_text="When the row was first written.")
+
+    class Meta:
+        app_label = "promotions"
+
+    def __str__(self) -> str:
+        return f"CodeIssue({self.idempotency_key})"
 
 
 @access.ops

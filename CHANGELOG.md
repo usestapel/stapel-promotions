@@ -6,7 +6,7 @@ Pre-1.0 semver: **minor = breaking**, patch = compatible.
 
 ## [Unreleased]
 
-## [0.1.0]
+## [0.1.0] (unreleased — the entries below land in it)
 
 First release: promo codes and automatic discounts over opaque purchasables.
 
@@ -65,6 +65,12 @@ First release: promo codes and automatic discounts over opaque purchasables.
   GDPR export/erase cover rows keyed by `actor_id`.
 - **API** under `/promotions/api/v1/`: `active/`, throttled
   `codes/validate/`, staff CRUD for promotions and codes, ledger pages.
-- `promotions.codes.issue` Function (referral rewards), `user.merged`
+- `promotions.codes.issue` Function (referral rewards), idempotent on an
+  optional `idempotency_key` (`CodeIssue`, unique key: a retry after a lost
+  answer returns the same codes, never mints a second);
+  `promotions.codes.revoke {code | code_id, reason}` withdraws a code
+  (`PromoCode.revoked_at` / `revoke_reason`; refused at validate, quote and
+  reserve with `error.409.promo_code_revoked`; committed redemptions
+  untouched; idempotent); `user.merged`
   consumer, GDPR owner (pseudonymize, keep economics), admin, system checks
   E001/E002/W001/W002 (silent without orders).
