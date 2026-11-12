@@ -22,7 +22,7 @@ DEFAULTS = {
     # A reserved redemption stops counting toward caps after this many
     # minutes; housekeeping marks it expired.
     "RESERVATION_TTL_MINUTES": 30,
-    # Axis: does a release after commit (a cancelled order) give the use
+    # Axis: does a `cancelled` release after commit (a cancelled order) give the use
     # back? True = the shopper may use the code again.
     "RETURN_USAGE_ON_RELEASE": True,
     # DRF rate for the public validate endpoint (code enumeration guard),

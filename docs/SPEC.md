@@ -56,10 +56,11 @@ denormalised counter: the count is taken under the row lock (§5).
 ## 3. Ledger FSM
 
 ```
-reserve ─► reserved ─► committed ─► released   (release after commit, RETURN_USAGE_ON_RELEASE)
-              │  └──► released                  (failed checkout)
+reserve ─► reserved ─► committed ─► released   (release reason cancelled only, RETURN_USAGE_ON_RELEASE)
+              │  └──► released                  (any release reason)
               └──► expired                      (TTL passed, housekeeping)
-expired/released ─► committed                   (a late commit wins: the order already holds the discount)
+expired/released ─► committed                   (a late commit wins: the order already holds the discount —
+                                                 unless a cancelled release reached the attempt first)
 ```
 
 All transitions are on the attempt and its rows together. `reserve` on a
@@ -141,9 +142,14 @@ Input = the orders adjuster request. Money is `Decimal` parsed from strings
   `promotions.redemption.committed` per row and `promotions.promotion.exhausted`
   when the total cap is now reached. Idempotent.
 - `release` (`{attempt_key, token|null, order_id|null, reason:
-  checkout_failed|cancelled|orphaned}`): `reserved` → `released`; `committed` →
-  `released` when `RETURN_USAGE_ON_RELEASE` (default true: a cancelled order
-  gives the use back) and emits `promotions.redemption.released`. Idempotent.
+  checkout_failed|cancelled|orphaned}`): `reserved` → `released` for any
+  reason. **Only `cancelled` undoes a commit:** `committed` → `released` when
+  `RETURN_USAGE_ON_RELEASE` (default true: a cancelled order gives the use
+  back) and emits `promotions.redemption.released`; `checkout_failed` /
+  `orphaned` on a committed attempt is a no-op answering `{ok: true,
+  status: "committed"}`. A `cancelled` release on a released/expired attempt
+  is recorded (`release_reason`) so a late commit stays a no-op. Idempotent.
+  `tests/test_release_semantics.py` is the full (state, event) table.
 - Unknown `attempt_key` on commit/release = `{ok: true, status: "none"}` (a
   checkout with no promotion reserved nothing).
 - A reservation older than `RESERVATION_TTL_MINUTES` stops counting toward

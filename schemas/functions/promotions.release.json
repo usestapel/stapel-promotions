@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "promotions.release",
-  "description": "The orders checkout hook, release step (a failed checkout, a cancelled order, an orphan). Output: {ok: true, status: 'released' | 'expired' | 'committed' | 'none'}; a committed attempt is released only when RETURN_USAGE_ON_RELEASE. Idempotent on attempt_key.",
+  "description": "The orders checkout hook, release step (a failed checkout, a cancelled order, an orphan). Output: {ok: true, status: 'released' | 'expired' | 'committed' | 'none'}. A reserved attempt is released for any reason; only reason cancelled undoes a committed attempt (when RETURN_USAGE_ON_RELEASE) — checkout_failed / orphaned on a committed attempt is a no-op answering ok. Idempotent on attempt_key.",
   "type": "object",
   "properties": {
     "attempt_key": {

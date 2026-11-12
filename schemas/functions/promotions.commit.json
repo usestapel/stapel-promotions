@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "promotions.commit",
-  "description": "The orders checkout hook, commit step (after orders.order.placed commits). Output: {ok: true, status: 'committed' | 'none'}. Idempotent on attempt_key; token is optional.",
+  "description": "The orders checkout hook, commit step (after orders.order.placed commits). Output: {ok: true, status: 'committed' | 'released' | 'expired' | 'none'}. A late commit after an expiry or a checkout_failed/orphaned release wins; after a cancelled release it is a no-op. Idempotent on attempt_key; token is optional.",
   "type": "object",
   "properties": {
     "attempt_key": {

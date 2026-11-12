@@ -33,7 +33,10 @@ First release: promo codes and automatic discounts over opaque purchasables.
   `preset.SETTINGS_DEFAULTS` wiring fragment.
 - **Ledger** `RedemptionAttempt` + `Redemption` with hold TTL, housekeeping
   beat, facts `promotions.redemption.committed` / `.released` and
-  `promotions.promotion.exhausted`; `RETURN_USAGE_ON_RELEASE` axis.
+  `promotions.promotion.exhausted`; `RETURN_USAGE_ON_RELEASE` axis. Only a
+  `cancelled` release undoes a committed attempt; `checkout_failed` /
+  `orphaned` on it answer ok and keep the use, and a commit after a cancel
+  is a no-op.
 - **API** under `/promotions/api/v1/`: `active/`, throttled
   `codes/validate/`, staff CRUD for promotions and codes, ledger pages.
 - `promotions.codes.issue` Function (referral rewards), `user.merged`

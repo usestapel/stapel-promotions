@@ -42,6 +42,9 @@ logger = logging.getLogger(__name__)
 LIVE = (RedemptionStatus.RESERVED, RedemptionStatus.COMMITTED)
 DEAD = (RedemptionStatus.RELEASED, RedemptionStatus.EXPIRED)
 
+#: The one release reason that undoes a committed checkout (orders contract delta 13).
+REASON_CANCELLED = "cancelled"
+
 
 def _attempt_key(payload) -> str:
     key = payload.get("attempt_key") if isinstance(payload, dict) else None
@@ -201,6 +204,9 @@ def commit(payload: dict) -> dict:
             return {"ok": True, "status": "none"}
         if attempt.status == RedemptionStatus.COMMITTED:
             return {"ok": True, "status": attempt.status}
+        if attempt.status in DEAD and attempt.release_reason == REASON_CANCELLED:
+            # The cancel overtook the commit: the order is gone.
+            return {"ok": True, "status": attempt.status}
         if attempt.status in DEAD:
             # The order already holds the discount: the late commit wins.
             logger.warning("promotions: commit of %s attempt %s", attempt.status, key)
@@ -228,7 +234,15 @@ def _maybe_exhausted(emit, promotion, attempt) -> None:
 
 
 def release(payload: dict) -> dict:
-    """Free the attempt's holds (a failed checkout, a cancel, an orphan)."""
+    """Free the attempt's holds (a failed checkout, a cancel, an orphan).
+
+    A reserved attempt is released for any reason. Only ``cancelled``
+    undoes a committed one (returning the use when
+    ``RETURN_USAGE_ON_RELEASE``); ``checkout_failed`` / ``orphaned`` on a
+    committed attempt is a no-op answering ok. A cancel that finds the
+    attempt already released or expired is recorded so a late commit
+    stays a no-op.
+    """
     from ..conf import promotions_settings
 
     key = _attempt_key(payload)
@@ -238,8 +252,14 @@ def release(payload: dict) -> dict:
         if attempt is None:
             return {"ok": True, "status": "none"}
         if attempt.status in DEAD:
+            if reason == REASON_CANCELLED and attempt.release_reason != REASON_CANCELLED:
+                attempt.release_reason = reason
+                attempt.save(update_fields=["release_reason", "updated_at"])
             return {"ok": True, "status": attempt.status}
         was_committed = attempt.status == RedemptionStatus.COMMITTED
+        if was_committed and reason != REASON_CANCELLED:
+            logger.info("promotions: release(%s) of committed attempt %s ignored", reason, key)
+            return {"ok": True, "status": attempt.status}
         if was_committed and not promotions_settings.RETURN_USAGE_ON_RELEASE:
             return {"ok": True, "status": attempt.status}
         rows = _rows(attempt)

@@ -21,7 +21,7 @@ The orders wiring is not a key here: it lives in `STAPEL_ORDERS`
 |-----|--------|---------|----------|---------|
 | MAX_CODES_PER_CART | env | most promo codes one cart may carry in `context.codes`; over is `error.400.promo_codes_too_many`. | no | 5 |
 | RESERVATION_TTL_MINUTES | env | a reserved use stops counting toward caps after this long; housekeeping marks it expired. Keep it above orders' `CHECKOUT_HOOK_ORPHAN_SECONDS` (check W002). | no | 30 |
-| RETURN_USAGE_ON_RELEASE | env | axis: a release after commit (a cancelled order) gives the use back. | no | true |
+| RETURN_USAGE_ON_RELEASE | env | axis: a `cancelled` release after commit (a cancelled order) gives the use back; other release reasons never touch a committed use. | no | true |
 | VALIDATE_RATE | env | DRF rate of `POST codes/validate/` per user or address (code enumeration guard); empty disables. | no | 30/min |
 | CODE_LENGTH | env | length of a generated code without its prefix; with the alphabet it must give ≥ 1e12 codes (check E002). | no | 10 |
 | CODE_ALPHABET | env | characters of generated codes, upper-case A-Z0-9 (default leaves out 0/O and 1/I). | no | ABCDEFGHJKLMNPQRSTUVWXYZ23456789 |

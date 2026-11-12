@@ -32,7 +32,7 @@ replace).
 |---|---|---|
 | `MAX_CODES_PER_CART` | `5` | codes per cart in `context.codes` |
 | `RESERVATION_TTL_MINUTES` | `30` | how long a reserved use counts (> orders' 900 s orphan sweep, W002) |
-| `RETURN_USAGE_ON_RELEASE` | `True` | axis: a cancelled order gives the use back |
+| `RETURN_USAGE_ON_RELEASE` | `True` | axis: a cancelled order gives the use back (only release reason `cancelled` touches a committed use) |
 | `VALIDATE_RATE` | `"30/min"` | throttle of `codes/validate/` |
 | `CODE_LENGTH` / `CODE_ALPHABET` | `10` / no 0,O,1,I | generated codes (≥ 1e12 space, E002) |
 | `GENERATE_MAX_PER_CALL` | `1000` | codes per API generate call |
