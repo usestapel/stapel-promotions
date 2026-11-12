@@ -80,7 +80,9 @@ loses free shipping silently. Pinned by `tests/test_delivery_interplay.py`
 exactly the adjustments with `meta.issuer == "promotions"` (amount per
 promotion), re-checks each under the row lock, and refuses with
 `error.409.promo_code_exhausted` / `error.409.promotion_exhausted` when one
-no longer holds. Guests (`user_id: null`) are refused a code with a
+no longer holds (`promotion_exhausted` params: `label`, plus `code` when the
+grant came from a code — an optional param `docs/errors.json` cannot list,
+since core derives params from the template's placeholders). Guests (`user_id: null`) are refused a code with a
 per-user cap (`error.403.promo_code_requires_account`). The payloads'
 `actor_id` (the acting account, a guest's own id too) is recorded on the
 attempt and ledger rows as their owner (`user_id` when absent);

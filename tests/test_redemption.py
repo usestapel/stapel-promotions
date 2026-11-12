@@ -170,3 +170,25 @@ def test_housekeeping_purges_old_dead_attempts(orders, user, settings):
     RedemptionAttempt.objects.update(updated_at=timezone.now() - dt.timedelta(days=91))
     assert redemption.purge_attempts() == 2  # the attempt and its ledger row
     assert not RedemptionAttempt.objects.exists()
+
+
+def test_promotion_exhausted_names_the_code_when_the_grant_came_from_one(orders, user):
+    from stapel_promotions.models import PromoCode
+
+    make_promotion(value="10", code="GONE")
+    payload = cart(user, ["gone"])
+    answer = orders.quote(payload)
+    PromoCode.objects.filter(code="GONE").delete()
+    _, reserved = orders.reserve(payload, answer)
+    [error] = reserved["errors"]
+    assert error["code"] == ERR_409_PROMOTION_EXHAUSTED
+    assert error["params"]["code"] == "GONE" and error["params"]["label"]
+
+
+def test_promotion_exhausted_of_an_automatic_promotion_has_no_code(orders, user, other_user):
+    make_promotion(value="10", automatic=True, usage_limit_total=1)
+    payload = cart(user)
+    answer = orders.quote(payload)
+    assert orders.checkout(cart(other_user))["placed"]
+    _, reserved = orders.reserve(payload, answer)
+    assert set(reserved["errors"][0]["params"]) == {"label"}

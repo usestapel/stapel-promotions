@@ -24,6 +24,8 @@ ERR_409_PROMO_CODE_EXHAUSTED = "error.409.promo_code_exhausted"
 ERR_409_PROMO_CODE_USER_LIMIT_REACHED = "error.409.promo_code_user_limit_reached"
 ERR_409_PROMO_CODE_MIN_SUBTOTAL = "error.409.promo_code_min_subtotal"
 ERR_409_PROMO_CODE_NOT_APPLICABLE = "error.409.promo_code_not_applicable"
+#: params ``label``; also ``code`` when the grant came from a promo code (optional:
+#: the template cannot name it, so errors.json lists ``label`` only).
 ERR_409_PROMOTION_EXHAUSTED = "error.409.promotion_exhausted"
 ERR_409_PROMOTION_HAS_REDEMPTIONS = "error.409.promotion_has_redemptions"
 ERR_409_PROMO_CODE_HAS_REDEMPTIONS = "error.409.promo_code_has_redemptions"

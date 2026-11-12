@@ -91,15 +91,22 @@ def grants(request: Request) -> "OrderedDict[int, dict]":
     return out
 
 
+def _exhausted(grant: dict) -> dict:
+    """``promotion_exhausted`` names the code too when the grant came from one."""
+    if grant["code"]:
+        return pricing.error(ERR_409_PROMOTION_EXHAUSTED, label=grant["label"], code=grant["code"])
+    return pricing.error(ERR_409_PROMOTION_EXHAUSTED, label=grant["label"])
+
+
 def _refusal(grant: dict, candidate, cart, now) -> dict | None:
     if candidate is None:
-        return pricing.error(ERR_409_PROMOTION_EXHAUSTED, label=grant["label"])
+        return _exhausted(grant)
     reason, params = pricing.check(candidate, cart, now)
     if reason is None:
         return None
     if candidate.code is not None:
         return pricing.error(reason, **params)
-    return pricing.error(ERR_409_PROMOTION_EXHAUSTED, label=grant["label"])
+    return _exhausted(grant)
 
 
 def find_attempt(key: str):
