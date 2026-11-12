@@ -1,0 +1,77 @@
+{
+  "module": "stapel-promotions",
+  "version": "0.1.0",
+  "provides": "Promo codes and automatic discounts for a Stapel shop. Staff define promotions (percent off, a fixed amount off, or free shipping), scoped to the whole cart, one purchasable type or a list of purchasable keys, with a time window, a minimum subtotal, a stackable flag and usage caps in total and per shopper; codes are many per promotion, case-insensitive, single-use or shared, optionally bound to one shopper, and generated in bulk. Automatic promotions apply without a code. The brick plugs into stapel-orders by Function name only: promotions.quote is the discount adjuster (deterministic, no writes, one adjustment per promotion, free shipping as a marker the shipping adjuster honours) and promotions.reserve/commit/release is the checkout hook that ledgers each use under the promotion's row lock, so two shoppers racing for the last use end as one order and one promo_code_exhausted. Money is Decimal end to end; a discount never exceeds what it applies to.",
+  "axes": [
+    {
+      "key": "RETURN_USAGE_ON_RELEASE",
+      "kind": "bool",
+      "default": true,
+      "group": "promotions.redemption",
+      "gates": {
+        "operations": [],
+        "co_gates": [],
+        "behavior": "true: promotions.release on a committed attempt marks its ledger rows released and emits promotions.redemption.released; false: it answers ok and the rows stay committed."
+      },
+      "curated": {
+        "summary": "true (default): when an order that used a promo code is cancelled, the use is returned, so a single-use code works again. false: the use stays spent. Values: true, false.",
+        "business_label": "Cancelled orders give the code back"
+      }
+    }
+  ],
+  "extension_points": [
+    {
+      "name": "promotions.quote",
+      "kind": "comm_function",
+      "summary": "The orders adjuster (kind discount, order 100). Reads context.codes; answers one negative adjustment per applied promotion and promo_code_* errors that refuse the checkout until the shopper removes the code."
+    },
+    {
+      "name": "promotions.reserve / promotions.commit / promotions.release",
+      "kind": "comm_function",
+      "summary": "The orders checkout hook. Reserve ledgers the promotions the order snapshot grants under the promotion row lock (re-counting caps), commit makes them permanent, release gives them back; all idempotent on the checkout attempt key."
+    },
+    {
+      "name": "promotions.codes.issue",
+      "kind": "comm_function",
+      "summary": "Mint new unique codes of a promotion, optionally bound to one user and single-use — the reward strategy a referral program calls."
+    },
+    {
+      "name": "STAPEL_PROMOTIONS_PROMOTION_PRESENTER / STAPEL_PROMOTIONS_PUBLIC_PRESENTER / STAPEL_PROMOTIONS_CODE_PRESENTER / STAPEL_PROMOTIONS_REDEMPTION_PRESENTER",
+      "kind": "presenter",
+      "summary": "Swap keys (STAPEL_SWAP) for the staff, public, code and ledger presenters."
+    },
+    {
+      "name": "promotions.redemption.committed",
+      "kind": "comm_event",
+      "summary": "A use became permanent (the order was placed): promotion, code, user, order, amount."
+    },
+    {
+      "name": "promotions.redemption.released",
+      "kind": "comm_event",
+      "summary": "A committed use was given back (a cancelled order), with the reason."
+    },
+    {
+      "name": "promotions.promotion.exhausted",
+      "kind": "comm_event",
+      "summary": "A promotion reached its total usage cap."
+    }
+  ],
+  "operations_total": 13,
+  "requires": [
+    {
+      "module": "stapel-core",
+      "optional": false,
+      "reason": "comm bus (promotions.* Functions and facts, user.merged consumer), AnchorPagination, GDPR owner protocol, AppSettings"
+    },
+    {
+      "module": "stapel-orders",
+      "optional": true,
+      "reason": "calls promotions.quote as its discount adjuster and promotions.reserve/commit/release as a checkout hook once stapel_promotions.preset.SETTINGS_DEFAULTS is in STAPEL_ORDERS; without orders the staff API, validate endpoint and Functions still work"
+    },
+    {
+      "module": "stapel-auth",
+      "optional": true,
+      "reason": "per-shopper caps are keyed on the user id; user.merged moves a guest's uses to the account on sign-in"
+    }
+  ]
+}

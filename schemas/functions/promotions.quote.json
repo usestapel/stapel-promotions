@@ -1,0 +1,122 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "promotions.quote",
+  "description": "The orders adjuster (kind=discount, STAPEL_ORDERS['ADJUSTERS']['promotions']). Input = the orders adjuster request. Output: {adjustments: [{kind: 'discount', code: <promo code> | 'auto:<promotion key>', label: <promotion name>, amount: negative decimal string (0.00 for the free-shipping marker), line_index: int | null, meta: {issuer: 'promotions', promotion_id, promotion_key, source: 'code'|'automatic', kind, free_shipping: bool, allocation?: [{line_index, amount}]}}], errors: [{code: 'error.<4xx>.promo_code_*', field: 'codes', params: {code, ...}}]}. One adjustment per applied promotion (at most 5). Free shipping is a marker adjustment (amount 0.00, meta.free_shipping true) the shipping adjuster finds in adjustments_so_far and zeroes its line by. No writes.",
+  "type": "object",
+  "properties": {
+    "currency": {
+      "type": "string",
+      "pattern": "^[A-Z]{3}$"
+    },
+    "subtotal": {
+      "type": "string",
+      "pattern": "^[0-9]+(\\.[0-9]{1,2})?$"
+    },
+    "user_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 64
+    },
+    "lines": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "index": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "purchasable_type": {
+            "type": "string",
+            "maxLength": 32
+          },
+          "purchasable_key": {
+            "type": "string",
+            "maxLength": 255
+          },
+          "quantity": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "unit_price": {
+            "type": "string",
+            "pattern": "^[0-9]+(\\.[0-9]{1,2})?$"
+          },
+          "line_total": {
+            "type": "string",
+            "pattern": "^[0-9]+(\\.[0-9]{1,2})?$"
+          },
+          "attrs": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "index",
+          "purchasable_type",
+          "purchasable_key",
+          "line_total"
+        ],
+        "additionalProperties": true
+      },
+      "maxItems": 500
+    },
+    "adjustments_so_far": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string"
+          },
+          "code": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 64
+          },
+          "label": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "amount": {
+            "type": "string",
+            "pattern": "^-?[0-9]+(\\.[0-9]{1,2})?$"
+          },
+          "line_index": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "meta": {
+            "type": "object"
+          },
+          "adjuster": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "amount"
+        ],
+        "additionalProperties": true
+      },
+      "maxItems": 100
+    },
+    "context": {
+      "type": "object",
+      "description": "Opaque to orders. promotions reads context.codes: a list of promo code strings (case-insensitive, at most MAX_CODES_PER_CART)."
+    }
+  },
+  "required": [
+    "currency",
+    "subtotal",
+    "lines"
+  ],
+  "additionalProperties": true
+}

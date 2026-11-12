@@ -1,0 +1,121 @@
+# stapel-promotions 0.1.0
+
+Promo codes and automatic discounts for a Stapel shop. Staff define promotions (percent off, a fixed amount off, or free shipping), scoped to the whole cart, one purchasable type or a list of purchasable keys, with a time window, a minimum subtotal, a stackable flag and usage caps in total and per shopper; codes are many per promotion, case-insensitive, single-use or shared, optionally bound to one shopper, and generated in bulk. Automatic promotions apply without a code. The brick plugs into stapel-orders by Function name only: promotions.quote is the discount adjuster (deterministic, no writes, one adjustment per promotion, free shipping as a marker the shipping adjuster honours) and promotions.reserve/commit/release is the checkout hook that ledgers each use under the promotion's row lock, so two shoppers racing for the last use end as one order and one promo_code_exhausted. Money is Decimal end to end; a discount never exceeds what it applies to.
+
+Contract: axes 1 · extension points 7 · operations 13 · error codes 65 · flows 2.
+Generated from docs/capabilities.json by `stapel-llms-txt` — do not edit; drift-gated by `make contract-check`.
+
+## Configuration axes — what a product switches on
+Settings keys; `default` is what you get by saying nothing. Turning an axis off unmounts the operations it gates.
+- RETURN_USAGE_ON_RELEASE [bool, default true] — Cancelled orders give the code back
+  true (default): when an order that used a promo code is cancelled, the use is returned, so a single-use code works again. false: the use stays spent. Values: true, false.
+
+## Extension points — what a product replaces, fork-free
+- STAPEL_PROMOTIONS_PROMOTION_PRESENTER / STAPEL_PROMOTIONS_PUBLIC_PRESENTER / STAPEL_PROMOTIONS_CODE_PRESENTER / STAPEL_PROMOTIONS_REDEMPTION_PRESENTER [presenter]
+  Swap keys (STAPEL_SWAP) for the staff, public, code and ledger presenters.
+- promotions.codes.issue [comm_function]
+  Mint new unique codes of a promotion, optionally bound to one user and single-use — the reward strategy a referral program calls.
+- promotions.promotion.exhausted [comm_event]
+  A promotion reached its total usage cap.
+- promotions.quote [comm_function]
+  The orders adjuster (kind discount, order 100). Reads context.codes; answers one negative adjustment per applied promotion and promo_code_* errors that refuse the checkout until the shopper removes the code.
+- promotions.redemption.committed [comm_event]
+  A use became permanent (the order was placed): promotion, code, user, order, amount.
+- promotions.redemption.released [comm_event]
+  A committed use was given back (a cancelled order), with the reason.
+- promotions.reserve / promotions.commit / promotions.release [comm_function]
+  The orders checkout hook. Reserve ledgers the promotions the order snapshot grants under the promotion row lock (re-counting caps), commit makes them permanent, release gives them back; all idempotent on the checkout attempt key.
+
+## Fits with — fleet dependencies
+- stapel-auth (optional) — per-shopper caps are keyed on the user id; user.merged moves a guest's uses to the account on sign-in
+- stapel-core (required) — comm bus (promotions.* Functions and facts, user.merged consumer), AnchorPagination, GDPR owner protocol, AppSettings
+- stapel-orders (optional) — calls promotions.quote as its discount adjuster and promotions.reserve/commit/release as a checkout hook once stapel_promotions.preset.SETTINGS_DEFAULTS is in STAPEL_ORDERS; without orders the staff API, validate endpoint and Functions still work
+
+## HTTP operations (13) — call by operationId, never by a typed path
+Paths are relative to `/promotions/api/v1/`.
+### Promotions
+- GET /active/ — promotions_active_list
+- POST /codes/validate/ — promotions_codes_validate
+- DELETE /staff/codes/{code_id}/ — promotions_staff_code_destroy
+- PATCH /staff/codes/{code_id}/ — promotions_staff_code_update
+- POST /staff/promotions/{promotion_id}/codes/ — promotions_staff_codes_create
+- POST /staff/promotions/{promotion_id}/codes/generate/ — promotions_staff_codes_generate
+- GET /staff/promotions/{promotion_id}/codes/ — promotions_staff_codes_list
+- POST /staff/promotions/ — promotions_staff_promotions_create
+- DELETE /staff/promotions/{promotion_id}/ — promotions_staff_promotions_destroy
+- GET /staff/promotions/ — promotions_staff_promotions_list
+- GET /staff/promotions/{promotion_id}/ — promotions_staff_promotions_retrieve
+- PATCH /staff/promotions/{promotion_id}/ — promotions_staff_promotions_update
+- GET /staff/promotions/{promotion_id}/redemptions/ — promotions_staff_redemptions_list
+
+## Error codes (65) — the StapelError envelope
+Render `t(code, params)`; branch UX on the remediation. Localized text lives in docs/errors.<lang>.md, not here.
+- error.400.bad_request [400] fix_input
+- error.400.captcha_invalid [400] retry
+- error.400.captcha_required [400] retry
+- error.400.expected_list [400] fix_input
+- error.400.field.blank [400] fix_input {field}
+- error.400.field.does_not_exist [400] fix_input {field}
+- error.400.field.invalid [400] fix_input {field}
+- error.400.field.invalid_choice [400] fix_input {field}
+- error.400.field.max_length [400] fix_input {field,max_length}
+- error.400.field.max_value [400] fix_input {field,max_value}
+- error.400.field.min_length [400] fix_input {field,min_length}
+- error.400.field.min_value [400] fix_input {field,min_value}
+- error.400.field.null [400] fix_input {field}
+- error.400.field.required [400] fix_input {field}
+- error.400.field.unique [400] fix_input {field}
+- error.400.generate_count_too_large [400] fix_input {max}
+- error.400.invalid_ad_id [400] fix_input
+- error.400.promo_code_format_invalid [400] fix_input
+- error.400.promo_code_unknown [400] fix_input {code}
+- error.400.promo_codes_invalid [400] fix_input
+- error.400.promo_codes_too_many [400] fix_input {max}
+- error.400.promotion_currency_required [400] fix_input
+- error.400.promotion_scope_invalid [400] fix_input
+- error.400.promotion_value_invalid [400] fix_input
+- error.400.promotion_window_invalid [400] fix_input
+- error.400.validation_error [400] fix_input
+- error.400.verification_failed [400] verify
+- error.400.verification_invalid_factor [400] verify
+- error.401.unauthorized [401] reauthenticate
+- error.402.payment_required [402] retry
+- error.403.forbidden [403] retry
+- error.403.network_blocked [403] contact_support
+- error.403.promo_code_requires_account [403] reauthenticate {code}
+- error.403.verification_enrollment_required [403] verify
+- error.403.verification_required [403] verify
+- error.404.ad_not_found [404] retry
+- error.404.not_found [404] retry
+- error.404.promo_code_not_found [404] retry
+- error.404.promotion_not_found [404] retry
+- error.404.verification_challenge_not_found [404] verify
+- error.405.method_not_allowed [405] retry
+- error.406.not_acceptable [406] retry
+- error.408.request_timeout [408] retry
+- error.409.code_space_exhausted [409] fix_input
+- error.409.conflict [409] fix_input
+- error.409.promo_code_exhausted [409] fix_input {code}
+- error.409.promo_code_has_redemptions [409] fix_input
+- error.409.promo_code_min_subtotal [409] fix_input {code,min_subtotal,currency}
+- error.409.promo_code_not_active [409] fix_input {code}
+- error.409.promo_code_not_applicable [409] fix_input {code}
+- error.409.promo_code_taken [409] fix_input {code}
+- error.409.promo_code_user_limit_reached [409] fix_input {code}
+- error.409.promotion_exhausted [409] retry {label}
+- error.409.promotion_has_redemptions [409] fix_input
+- error.409.promotion_key_taken [409] fix_input {key}
+- error.410.gone [410] retry
+- error.413.payload_too_large [413] retry
+- error.415.unsupported_media_type [415] retry
+- error.422.unprocessable_entity [422] wait_and_retry
+- error.423.locked [423] wait_and_retry
+- error.423.verification_locked [423] wait_and_retry
+- error.429.rate_limit [429] wait_and_retry {retry_after_minutes}
+- error.429.too_many_requests [429] wait_and_retry
+- error.500.internal [500] contact_support
+- error.503.mandate_unavailable [503] retry
+
+## Documented flows (2) — full steps in docs/flows.json
+- promotions.manage — Run a promotion
+- promotions.redeem — Use a promo code at checkout

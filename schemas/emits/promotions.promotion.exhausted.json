@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "promotions.promotion.exhausted",
+  "description": "A commit made a promotion reach its total usage cap. Key = promotion id.",
+  "type": "object",
+  "properties": {
+    "promotion_id": {
+      "type": "string"
+    },
+    "promotion_key": {
+      "type": "string",
+      "maxLength": 58
+    },
+    "usage_limit_total": {
+      "type": "integer"
+    },
+    "used": {
+      "type": "integer"
+    }
+  },
+  "required": [
+    "promotion_id",
+    "promotion_key",
+    "usage_limit_total",
+    "used"
+  ],
+  "additionalProperties": false
+}

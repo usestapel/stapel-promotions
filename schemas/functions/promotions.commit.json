@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "promotions.commit",
+  "description": "The orders checkout hook, commit step (after orders.order.placed commits). Output: {ok: true, status: 'committed' | 'none'}. Idempotent on attempt_key; token is optional.",
+  "type": "object",
+  "properties": {
+    "attempt_key": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "token": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 64
+    },
+    "order_id": {
+      "type": [
+        "string",
+        "integer",
+        "null"
+      ]
+    },
+    "user_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 64
+    }
+  },
+  "required": [
+    "attempt_key"
+  ],
+  "additionalProperties": true
+}

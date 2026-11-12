@@ -1,0 +1,223 @@
+[
+  {
+    "id": "promotions.manage",
+    "title": "Run a promotion",
+    "title_key": "flow.promotions.manage.title",
+    "description": "Staff create a promotion (percent, fixed amount or free shipping; the scope, window, minimum subtotal and usage caps), attach codes or generate a batch, and watch the ledger.",
+    "description_key": "flow.promotions.manage.description",
+    "actors": [
+      "Staff"
+    ],
+    "steps": [
+      {
+        "kind": "http",
+        "order": 1,
+        "note": "Page through the promotions",
+        "note_key": "flow.promotions.manage.step.1.note",
+        "ref": "stapel_promotions.views.StaffPromotionListView.get",
+        "endpoints": [
+          {
+            "method": "GET",
+            "path": "/promotions/api/v1/staff/promotions/"
+          }
+        ]
+      },
+      {
+        "kind": "http",
+        "order": 2,
+        "note": "Create a promotion",
+        "note_key": "flow.promotions.manage.step.2.note",
+        "ref": "stapel_promotions.views.StaffPromotionListView.post",
+        "endpoints": [
+          {
+            "method": "POST",
+            "path": "/promotions/api/v1/staff/promotions/"
+          }
+        ]
+      },
+      {
+        "kind": "http",
+        "order": 3,
+        "note": "Open a promotion with its usage",
+        "note_key": "flow.promotions.manage.step.3.note",
+        "ref": "stapel_promotions.views.StaffPromotionDetailView.get",
+        "endpoints": [
+          {
+            "method": "GET",
+            "path": "/promotions/api/v1/staff/promotions/<int:promotion_id>/"
+          }
+        ]
+      },
+      {
+        "kind": "http",
+        "order": 4,
+        "note": "Change or deactivate a promotion",
+        "note_key": "flow.promotions.manage.step.4.note",
+        "ref": "stapel_promotions.views.StaffPromotionDetailView.patch",
+        "endpoints": [
+          {
+            "method": "PATCH",
+            "path": "/promotions/api/v1/staff/promotions/<int:promotion_id>/"
+          }
+        ]
+      },
+      {
+        "kind": "http",
+        "order": 5,
+        "note": "Delete a promotion nobody has used",
+        "note_key": "flow.promotions.manage.step.5.note",
+        "ref": "stapel_promotions.views.StaffPromotionDetailView.delete",
+        "endpoints": [
+          {
+            "method": "DELETE",
+            "path": "/promotions/api/v1/staff/promotions/<int:promotion_id>/"
+          }
+        ]
+      },
+      {
+        "kind": "http",
+        "order": 6,
+        "note": "Page through a promotion's codes",
+        "note_key": "flow.promotions.manage.step.6.note",
+        "ref": "stapel_promotions.views.StaffCodeListView.get",
+        "endpoints": [
+          {
+            "method": "GET",
+            "path": "/promotions/api/v1/staff/promotions/<int:promotion_id>/codes/"
+          }
+        ]
+      },
+      {
+        "kind": "http",
+        "order": 7,
+        "note": "Attach a code",
+        "note_key": "flow.promotions.manage.step.7.note",
+        "ref": "stapel_promotions.views.StaffCodeListView.post",
+        "endpoints": [
+          {
+            "method": "POST",
+            "path": "/promotions/api/v1/staff/promotions/<int:promotion_id>/codes/"
+          }
+        ]
+      },
+      {
+        "kind": "http",
+        "order": 8,
+        "note": "Generate a batch of unique codes",
+        "note_key": "flow.promotions.manage.step.8.note",
+        "ref": "stapel_promotions.views.StaffCodeGenerateView.post",
+        "endpoints": [
+          {
+            "method": "POST",
+            "path": "/promotions/api/v1/staff/promotions/<int:promotion_id>/codes/generate/"
+          }
+        ]
+      },
+      {
+        "kind": "http",
+        "order": 9,
+        "note": "Deactivate a code or change its cap",
+        "note_key": "flow.promotions.manage.step.9.note",
+        "ref": "stapel_promotions.views.StaffCodeDetailView.patch",
+        "endpoints": [
+          {
+            "method": "PATCH",
+            "path": "/promotions/api/v1/staff/codes/<int:code_id>/"
+          }
+        ]
+      },
+      {
+        "kind": "http",
+        "order": 10,
+        "note": "Delete an unused code",
+        "note_key": "flow.promotions.manage.step.10.note",
+        "ref": "stapel_promotions.views.StaffCodeDetailView.delete",
+        "endpoints": [
+          {
+            "method": "DELETE",
+            "path": "/promotions/api/v1/staff/codes/<int:code_id>/"
+          }
+        ]
+      },
+      {
+        "kind": "http",
+        "order": 11,
+        "note": "Read the redemption ledger",
+        "note_key": "flow.promotions.manage.step.11.note",
+        "ref": "stapel_promotions.views.StaffRedemptionListView.get",
+        "endpoints": [
+          {
+            "method": "GET",
+            "path": "/promotions/api/v1/staff/promotions/<int:promotion_id>/redemptions/"
+          }
+        ]
+      },
+      {
+        "kind": "action",
+        "order": 12,
+        "note": "The total cap is reached",
+        "note_key": "flow.promotions.manage.step.12.note",
+        "ref": "promotions.promotion.exhausted"
+      }
+    ]
+  },
+  {
+    "id": "promotions.redeem",
+    "title": "Use a promo code at checkout",
+    "title_key": "flow.promotions.redeem.title",
+    "description": "A shopper sees the live sales, checks a promo code, and checks out with it. The orders checkout asks promotions.quote for the discount, then promotions.reserve holds the use under the promotion's row lock, and promotions.commit makes it permanent once the order is placed; a failed or cancelled checkout calls promotions.release.",
+    "description_key": "flow.promotions.redeem.description",
+    "actors": [
+      "Shopper (guest or signed in)"
+    ],
+    "steps": [
+      {
+        "kind": "human",
+        "order": 0,
+        "note": "The shopper types a code on the cart page",
+        "note_key": "flow.promotions.redeem.step.0.note",
+        "ref": ""
+      },
+      {
+        "kind": "http",
+        "order": 1,
+        "note": "See the sales running now",
+        "note_key": "flow.promotions.redeem.step.1.note",
+        "ref": "stapel_promotions.views.ActivePromotionsView.get",
+        "endpoints": [
+          {
+            "method": "GET",
+            "path": "/promotions/api/v1/active/"
+          }
+        ]
+      },
+      {
+        "kind": "http",
+        "order": 2,
+        "note": "Check a promo code before adding it to the order",
+        "note_key": "flow.promotions.redeem.step.2.note",
+        "ref": "stapel_promotions.views.CodeValidateView.post",
+        "endpoints": [
+          {
+            "method": "POST",
+            "path": "/promotions/api/v1/codes/validate/"
+          }
+        ]
+      },
+      {
+        "kind": "action",
+        "order": 3,
+        "note": "The use is recorded on the ledger",
+        "note_key": "flow.promotions.redeem.step.3.note",
+        "ref": "promotions.redemption.committed"
+      },
+      {
+        "kind": "action",
+        "order": 4,
+        "note": "A cancelled order gives the use back",
+        "note_key": "flow.promotions.redeem.step.4.note",
+        "ref": "promotions.redemption.released"
+      }
+    ]
+  }
+]

@@ -1,0 +1,128 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "promotions.reserve",
+  "description": "The orders checkout hook, reserve step. Input = the adjuster request + attempt_key; adjustments_so_far is the complete final list, and the adjustments promotions issued in it (meta.issuer = 'promotions') are what gets ledgered, under the promotion row lock. Output: {ok: bool, token: string | null, errors: [{code, field, params}]}. Idempotent on attempt_key: a live reservation answers the same token; after a release it reserves anew.",
+  "type": "object",
+  "properties": {
+    "currency": {
+      "type": "string",
+      "pattern": "^[A-Z]{3}$"
+    },
+    "subtotal": {
+      "type": "string",
+      "pattern": "^[0-9]+(\\.[0-9]{1,2})?$"
+    },
+    "user_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 64
+    },
+    "lines": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "index": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "purchasable_type": {
+            "type": "string",
+            "maxLength": 32
+          },
+          "purchasable_key": {
+            "type": "string",
+            "maxLength": 255
+          },
+          "quantity": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "unit_price": {
+            "type": "string",
+            "pattern": "^[0-9]+(\\.[0-9]{1,2})?$"
+          },
+          "line_total": {
+            "type": "string",
+            "pattern": "^[0-9]+(\\.[0-9]{1,2})?$"
+          },
+          "attrs": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "index",
+          "purchasable_type",
+          "purchasable_key",
+          "line_total"
+        ],
+        "additionalProperties": true
+      },
+      "maxItems": 500
+    },
+    "adjustments_so_far": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string"
+          },
+          "code": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 64
+          },
+          "label": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "amount": {
+            "type": "string",
+            "pattern": "^-?[0-9]+(\\.[0-9]{1,2})?$"
+          },
+          "line_index": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "meta": {
+            "type": "object"
+          },
+          "adjuster": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "amount"
+        ],
+        "additionalProperties": true
+      },
+      "maxItems": 100
+    },
+    "context": {
+      "type": "object",
+      "description": "Opaque to orders. promotions reads context.codes: a list of promo code strings (case-insensitive, at most MAX_CODES_PER_CART)."
+    },
+    "attempt_key": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    }
+  },
+  "required": [
+    "attempt_key",
+    "currency",
+    "subtotal",
+    "lines"
+  ],
+  "additionalProperties": true
+}

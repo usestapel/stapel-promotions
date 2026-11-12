@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "promotions.redemption.released",
+  "description": "A committed use was given back (the order was cancelled; RETURN_USAGE_ON_RELEASE). Key = promotion id.",
+  "type": "object",
+  "properties": {
+    "redemption_id": {
+      "type": "string"
+    },
+    "promotion_id": {
+      "type": "string"
+    },
+    "promotion_key": {
+      "type": "string",
+      "maxLength": 58
+    },
+    "code": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 64
+    },
+    "user_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 64
+    },
+    "attempt_key": {
+      "type": "string",
+      "maxLength": 128
+    },
+    "order_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 64
+    },
+    "amount": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]{2}$"
+    },
+    "currency": {
+      "type": "string",
+      "pattern": "^[A-Z]{3}$"
+    },
+    "free_shipping": {
+      "type": "boolean"
+    },
+    "reason": {
+      "type": "string",
+      "maxLength": 64
+    }
+  },
+  "required": [
+    "redemption_id",
+    "promotion_id",
+    "promotion_key",
+    "code",
+    "user_id",
+    "attempt_key",
+    "order_id",
+    "amount",
+    "currency",
+    "free_shipping",
+    "reason"
+  ],
+  "additionalProperties": false
+}

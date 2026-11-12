@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "promotions.codes.issue",
+  "description": "Mint new unique codes of an existing promotion, e.g. a referral reward. Output: {promotion_key, codes: [string]}. Unknown promotion_key fails the call.",
+  "type": "object",
+  "properties": {
+    "promotion_key": {
+      "type": "string",
+      "maxLength": 58
+    },
+    "count": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 100
+    },
+    "assigned_user_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 64
+    },
+    "prefix": {
+      "type": "string",
+      "maxLength": 16
+    },
+    "usage_limit": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 1
+    }
+  },
+  "required": [
+    "promotion_key"
+  ],
+  "additionalProperties": false
+}

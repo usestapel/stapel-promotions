@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "promotions.release",
+  "description": "The orders checkout hook, release step (a failed checkout, a cancelled order, an orphan). Output: {ok: true, status: 'released' | 'expired' | 'committed' | 'none'}; a committed attempt is released only when RETURN_USAGE_ON_RELEASE. Idempotent on attempt_key.",
+  "type": "object",
+  "properties": {
+    "attempt_key": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "token": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 64
+    },
+    "order_id": {
+      "type": [
+        "string",
+        "integer",
+        "null"
+      ]
+    },
+    "reason": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 64,
+      "description": "checkout_failed | cancelled | orphaned"
+    }
+  },
+  "required": [
+    "attempt_key"
+  ],
+  "additionalProperties": true
+}
