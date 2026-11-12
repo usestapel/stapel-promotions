@@ -80,3 +80,18 @@ def test_codes_issue_mints_assigned_single_use_codes(user):
     assert (row.usage_limit, row.assigned_user_id) == (1, str(user.pk))
     with pytest.raises(Exception):
         call("promotions.codes.issue", {"promotion_key": "missing"})
+
+
+@pytest.mark.parametrize("code,ok", [
+    ("SUMMER-10", True), ("SUMMER_10", True), ("10OFF", True),
+    ("_LEAD", False), ("-LEAD", False), ("SUMMER.10", False), ("\u041b\u0415\u0422\u041e", False),
+])
+def test_the_format_rule_is_the_one_the_message_states(code, ok):
+    """The message names exactly what CODE_RE admits: Latin letters, digits,
+    dashes and underscores, starting with a letter or digit."""
+    from stapel_promotions.errors import ERR_400_PROMO_CODE_FORMAT_INVALID, STAPEL_PROMOTIONS_ERRORS
+
+    assert code_text.is_well_formed(code) is ok
+    text = STAPEL_PROMOTIONS_ERRORS[ERR_400_PROMO_CODE_FORMAT_INVALID]
+    for named in ("Latin letters", "digits", "dashes", "underscores", "starts with a letter or digit"):
+        assert named in text

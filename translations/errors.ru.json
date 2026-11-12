@@ -1,6 +1,6 @@
 {
   "error.400.generate_count_too_large": "Не больше {max} кодов за один запрос",
-  "error.400.promo_code_format_invalid": "Промокод может содержать только буквы, цифры и дефисы",
+  "error.400.promo_code_format_invalid": "Промокод может содержать только латинские буквы, цифры, дефисы и подчёркивания и начинается с буквы или цифры",
   "error.400.promo_code_unknown": "Промокода {code} не существует",
   "error.400.promo_codes_invalid": "Промокоды должны быть списком коротких строк",
   "error.400.promo_codes_too_many": "Не больше {max} промокодов на заказ",

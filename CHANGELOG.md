@@ -11,6 +11,9 @@ Pre-1.0 semver: **minor = breaking**, patch = compatible.
 First release: promo codes and automatic discounts over opaque purchasables.
 
 ### Added
+- `error.400.promo_code_format_invalid` states the rule the code applies:
+  Latin letters, digits, dashes and underscores, starting with a letter or
+  digit (the rule is unchanged).
 - Error translations `translations/errors.{ru,es}.json` (from the React
   pair's catalogue) in the wheel, gated by `tests/test_error_i18n.py`
   (coverage, placeholders, byte form, package-data).

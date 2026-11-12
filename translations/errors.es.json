@@ -1,6 +1,6 @@
 {
   "error.400.generate_count_too_large": "Como máximo {max} códigos por solicitud",
-  "error.400.promo_code_format_invalid": "Un código promocional solo puede contener letras, dígitos y guiones",
+  "error.400.promo_code_format_invalid": "Un código promocional solo puede contener letras latinas, dígitos, guiones y guiones bajos, y empieza por una letra o un dígito",
   "error.400.promo_code_unknown": "El código promocional {code} no existe",
   "error.400.promo_codes_invalid": "Los códigos promocionales deben ser una lista de textos cortos",
   "error.400.promo_codes_too_many": "Como máximo {max} códigos promocionales por pedido",

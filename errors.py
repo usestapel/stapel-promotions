@@ -39,7 +39,7 @@ STAPEL_PROMOTIONS_ERRORS = {
     ERR_400_PROMOTION_CURRENCY_REQUIRED: "A fixed discount or a minimum order amount needs a currency",
     ERR_400_PROMOTION_SCOPE_INVALID: "The promotion scope is incomplete",
     ERR_400_PROMOTION_WINDOW_INVALID: "The promotion must end after it starts",
-    ERR_400_PROMO_CODE_FORMAT_INVALID: "A promo code may contain letters, digits and dashes only",
+    ERR_400_PROMO_CODE_FORMAT_INVALID: "A promo code may contain only Latin letters, digits, dashes and underscores, and starts with a letter or digit",
     ERR_400_GENERATE_COUNT_TOO_LARGE: "At most {max} codes per request",
     ERR_403_PROMO_CODE_REQUIRES_ACCOUNT: "Sign in to use promo code {code}",
     ERR_404_PROMOTION_NOT_FOUND: "Promotion not found",

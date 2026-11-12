@@ -168,7 +168,7 @@
     "status": 400,
     "params": [],
     "remediation": "fix_input",
-    "en": "A promo code may contain letters, digits and dashes only",
+    "en": "A promo code may contain only Latin letters, digits, dashes and underscores, and starts with a letter or digit",
     "owner": "stapel_promotions"
   },
   {
