@@ -1,7 +1,8 @@
 """``actor_id``: who owns a checkout's redemption rows, a guest included.
 
 Orders sends ``actor_id`` (always present: the guest's own id or the
-account) next to ``user_id`` (null for a guest on every payload). Per-user
+account) next to ``user_id`` (null for a guest on the adjuster and hook payloads; the
+``orders.order.placed`` fact keeps ``user_id`` = the acting account). Per-user
 caps still read ``user_id`` and refuse a guest; the ledger records the
 actor, which ``user.merged`` and GDPR export/erase follow. Payloads without
 ``actor_id`` record ``user_id`` as the actor (today's behaviour).

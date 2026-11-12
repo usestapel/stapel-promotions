@@ -199,7 +199,8 @@ too small. Without orders installed every check is silent.
 
 **Ownership (`actor_id`).** Orders sends `actor_id` (the acting account,
 a guest's own id included, always present) next to `user_id` (null for a
-guest on every payload). Per-user caps read `user_id` only, so they still
+guest on the adjuster and hook payloads; the `orders.order.placed` fact keeps
+`user_id` = the acting account). Per-user caps read `user_id` only, so they still
 refuse a guest; reserve records `actor_id` on the attempt and its ledger
 rows (payloads without it record `user_id`; a commit fills a blank one).
 `user.merged` moves rows by `user_id` and by `actor_id` — a guest's rows
