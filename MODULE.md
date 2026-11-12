@@ -49,6 +49,9 @@ SETTINGS_DEFAULTS = {"STAPEL_ORDERS": {
 }}
 ```
 
+Hook order is explicit: inventory 50 (stock first), promotions 100,
+delivery 200; orders reserves ascending and releases in reverse.
+
 The scaffold merges `SETTINGS_DEFAULTS` for composites only today; a
 hand-wired host pastes the fragment (README quick start). The adjuster
 without the hook is `stapel_promotions.E001` (discounts no cap counts);

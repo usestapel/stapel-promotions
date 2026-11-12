@@ -24,6 +24,9 @@ adjuster without the hook grants discounts no cap ever counts
 #: The registry name under which promotions plugs into orders.
 ORDERS_NAME = "promotions"
 ADJUSTER_ORDER = 100
+#: Hook order: inventory 50 (stock first), promotions 100, delivery 200 —
+#: explicit, never a tie broken by name.
+HOOK_ORDER = 100
 
 SETTINGS_DEFAULTS = {
     "STAPEL_ORDERS": {
@@ -35,10 +38,10 @@ SETTINGS_DEFAULTS = {
                 "reserve": "promotions.reserve",
                 "commit": "promotions.commit",
                 "release": "promotions.release",
-                "order": ADJUSTER_ORDER,
+                "order": HOOK_ORDER,
             },
         },
     },
 }
 
-__all__ = ["ADJUSTER_ORDER", "ORDERS_NAME", "SETTINGS_DEFAULTS"]
+__all__ = ["ADJUSTER_ORDER", "HOOK_ORDER", "ORDERS_NAME", "SETTINGS_DEFAULTS"]
