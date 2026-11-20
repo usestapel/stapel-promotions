@@ -1,0 +1,2112 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "",
+    "version": "0.0.0",
+    "x-stapel-contract": 2
+  },
+  "paths": {
+    "/promotions/api/v1/active/": {
+      "get": {
+        "operationId": "promotions_active_list",
+        "description": "Automatic promotions live now — for a sale banner.\n\n**Permissions:** `AllowAny`",
+        "tags": [
+          "Promotions"
+        ],
+        "security": [
+          {
+            "JWTCookieAuth": []
+          },
+          {
+            "JWTBearerAuth": []
+          },
+          {}
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActivePromotionList"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "x-stapel-flows": [
+          "promotions.redeem"
+        ]
+      }
+    },
+    "/promotions/api/v1/codes/validate/": {
+      "post": {
+        "operationId": "promotions_codes_validate",
+        "description": "Would this code apply? The real discount comes from the orders quote.\n\n**Permissions:** `AllowAny`",
+        "tags": [
+          "Promotions"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CodeValidateRequest"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/CodeValidateRequest"
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/CodeValidateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "JWTCookieAuth": []
+          },
+          {
+            "JWTBearerAuth": []
+          },
+          {}
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CodeValidateResponse"
+                }
+              }
+            },
+            "description": ""
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StapelError"
+                }
+              }
+            },
+            "description": "Bad Request",
+            "x-stapel-errors": [
+              "error.400.promo_code_unknown"
+            ]
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StapelError"
+                }
+              }
+            },
+            "description": "Forbidden",
+            "x-stapel-errors": [
+              "error.403.promo_code_requires_account"
+            ]
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StapelError"
+                }
+              }
+            },
+            "description": "Conflict",
+            "x-stapel-errors": [
+              "error.409.promo_code_exhausted",
+              "error.409.promo_code_min_subtotal",
+              "error.409.promo_code_not_active",
+              "error.409.promo_code_not_applicable",
+              "error.409.promo_code_revoked",
+              "error.409.promo_code_user_limit_reached"
+            ]
+          }
+        },
+        "x-stapel-flows": [
+          "promotions.redeem"
+        ]
+      }
+    },
+    "/promotions/api/v1/staff/codes/{code_id}/": {
+      "patch": {
+        "operationId": "promotions_staff_code_update",
+        "description": "Renders a service refusal as the fleet error envelope.\n\n**Permissions:** `IsStaffUser`",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "code_id",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true
+          }
+        ],
+        "tags": [
+          "Promotions"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchedPromoCodeUpdateRequest"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchedPromoCodeUpdateRequest"
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchedPromoCodeUpdateRequest"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "JWTCookieAuth": []
+          },
+          {
+            "JWTBearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PromoCodeResponse"
+                }
+              }
+            },
+            "description": ""
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StapelError"
+                }
+              }
+            },
+            "description": "Not Found",
+            "x-stapel-errors": [
+              "error.404.promo_code_not_found"
+            ]
+          }
+        },
+        "x-stapel-flows": [
+          "promotions.manage"
+        ]
+      },
+      "delete": {
+        "operationId": "promotions_staff_code_destroy",
+        "description": "Renders a service refusal as the fleet error envelope.\n\n**Permissions:** `IsStaffUser`",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "code_id",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true
+          }
+        ],
+        "tags": [
+          "Promotions"
+        ],
+        "security": [
+          {
+            "JWTCookieAuth": []
+          },
+          {
+            "JWTBearerAuth": []
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No response body"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StapelError"
+                }
+              }
+            },
+            "description": "Not Found",
+            "x-stapel-errors": [
+              "error.404.promo_code_not_found"
+            ]
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StapelError"
+                }
+              }
+            },
+            "description": "Conflict",
+            "x-stapel-errors": [
+              "error.409.promo_code_has_redemptions"
+            ]
+          }
+        },
+        "x-stapel-flows": [
+          "promotions.manage"
+        ]
+      }
+    },
+    "/promotions/api/v1/staff/promotions/": {
+      "get": {
+        "operationId": "promotions_staff_promotions_list",
+        "description": "Renders a service refusal as the fleet error envelope.\n\n**Permissions:** `IsStaffUser`",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "active",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "anchor",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Opaque anchor from next_anchor/prev_anchor (exclusive)."
+          },
+          {
+            "in": "query",
+            "name": "direction",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "next",
+                "prev"
+              ]
+            },
+            "description": "Walk direction from the anchor."
+          },
+          {
+            "in": "query",
+            "name": "kind",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "fixed",
+                "free_shipping",
+                "percent"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Page size, default 50, max 200."
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Name, key or an exact code."
+          }
+        ],
+        "tags": [
+          "Promotions"
+        ],
+        "security": [
+          {
+            "JWTCookieAuth": []
+          },
+          {
+            "JWTBearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PromotionPage"
+                }
+              }
+            },
+            "description": ""
+          }
+        },
+        "x-stapel-flows": [
+          "promotions.manage"
+        ],
+        "x-stapel-pagination": {
+          "style": "anchor",
+          "items": "items",
+          "params": [
+            "anchor",
+            "direction",
+            "limit"
+          ]
+        }
+      },
+      "post": {
+        "operationId": "promotions_staff_promotions_create",
+        "description": "Renders a service refusal as the fleet error envelope.\n\n**Permissions:** `IsStaffUser`",
+        "tags": [
+          "Promotions"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PromotionWriteRequest"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/PromotionWriteRequest"
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/PromotionWriteRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "JWTCookieAuth": []
+          },
+          {
+            "JWTBearerAuth": []
+          }
+        ],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PromotionResponse"
+                }
+              }
+            },
+            "description": ""
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StapelError"
+                }
+              }
+            },
+            "description": "Bad Request",
+            "x-stapel-errors": [
+              "error.400.promotion_currency_required",
+              "error.400.promotion_scope_invalid",
+              "error.400.promotion_value_invalid",
+              "error.400.promotion_window_invalid"
+            ]
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StapelError"
+                }
+              }
+            },
+            "description": "Conflict",
+            "x-stapel-errors": [
+              "error.409.promotion_key_taken"
+            ]
+          }
+        },
+        "x-stapel-flows": [
+          "promotions.manage"
+        ]
+      }
+    },
+    "/promotions/api/v1/staff/promotions/{promotion_id}/": {
+      "get": {
+        "operationId": "promotions_staff_promotions_retrieve",
+        "description": "Renders a service refusal as the fleet error envelope.\n\n**Permissions:** `IsStaffUser`",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "promotion_id",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true
+          }
+        ],
+        "tags": [
+          "Promotions"
+        ],
+        "security": [
+          {
+            "JWTCookieAuth": []
+          },
+          {
+            "JWTBearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PromotionResponse"
+                }
+              }
+            },
+            "description": ""
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StapelError"
+                }
+              }
+            },
+            "description": "Not Found",
+            "x-stapel-errors": [
+              "error.404.promotion_not_found"
+            ]
+          }
+        },
+        "x-stapel-flows": [
+          "promotions.manage"
+        ]
+      },
+      "patch": {
+        "operationId": "promotions_staff_promotions_update",
+        "description": "Renders a service refusal as the fleet error envelope.\n\n**Permissions:** `IsStaffUser`",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "promotion_id",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true
+          }
+        ],
+        "tags": [
+          "Promotions"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchedPromotionWriteRequest"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchedPromotionWriteRequest"
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchedPromotionWriteRequest"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "JWTCookieAuth": []
+          },
+          {
+            "JWTBearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PromotionResponse"
+                }
+              }
+            },
+            "description": ""
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StapelError"
+                }
+              }
+            },
+            "description": "Bad Request",
+            "x-stapel-errors": [
+              "error.400.promotion_currency_required",
+              "error.400.promotion_scope_invalid",
+              "error.400.promotion_value_invalid",
+              "error.400.promotion_window_invalid"
+            ]
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StapelError"
+                }
+              }
+            },
+            "description": "Not Found",
+            "x-stapel-errors": [
+              "error.404.promotion_not_found"
+            ]
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StapelError"
+                }
+              }
+            },
+            "description": "Conflict",
+            "x-stapel-errors": [
+              "error.409.promotion_key_taken"
+            ]
+          }
+        },
+        "x-stapel-flows": [
+          "promotions.manage"
+        ]
+      },
+      "delete": {
+        "operationId": "promotions_staff_promotions_destroy",
+        "description": "Renders a service refusal as the fleet error envelope.\n\n**Permissions:** `IsStaffUser`",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "promotion_id",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true
+          }
+        ],
+        "tags": [
+          "Promotions"
+        ],
+        "security": [
+          {
+            "JWTCookieAuth": []
+          },
+          {
+            "JWTBearerAuth": []
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No response body"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StapelError"
+                }
+              }
+            },
+            "description": "Not Found",
+            "x-stapel-errors": [
+              "error.404.promotion_not_found"
+            ]
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StapelError"
+                }
+              }
+            },
+            "description": "Conflict",
+            "x-stapel-errors": [
+              "error.409.promotion_has_redemptions"
+            ]
+          }
+        },
+        "x-stapel-flows": [
+          "promotions.manage"
+        ]
+      }
+    },
+    "/promotions/api/v1/staff/promotions/{promotion_id}/codes/": {
+      "get": {
+        "operationId": "promotions_staff_codes_list",
+        "description": "Renders a service refusal as the fleet error envelope.\n\n**Permissions:** `IsStaffUser`",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "anchor",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Opaque anchor from next_anchor/prev_anchor (exclusive)."
+          },
+          {
+            "in": "query",
+            "name": "batch",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Only the codes of this generation batch."
+          },
+          {
+            "in": "query",
+            "name": "direction",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "next",
+                "prev"
+              ]
+            },
+            "description": "Walk direction from the anchor."
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Page size, default 50, max 200."
+          },
+          {
+            "in": "path",
+            "name": "promotion_id",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true
+          }
+        ],
+        "tags": [
+          "Promotions"
+        ],
+        "security": [
+          {
+            "JWTCookieAuth": []
+          },
+          {
+            "JWTBearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PromoCodePage"
+                }
+              }
+            },
+            "description": ""
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StapelError"
+                }
+              }
+            },
+            "description": "Not Found",
+            "x-stapel-errors": [
+              "error.404.promotion_not_found"
+            ]
+          }
+        },
+        "x-stapel-flows": [
+          "promotions.manage"
+        ],
+        "x-stapel-pagination": {
+          "style": "anchor",
+          "items": "items",
+          "params": [
+            "anchor",
+            "direction",
+            "limit"
+          ]
+        }
+      },
+      "post": {
+        "operationId": "promotions_staff_codes_create",
+        "description": "Renders a service refusal as the fleet error envelope.\n\n**Permissions:** `IsStaffUser`",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "promotion_id",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true
+          }
+        ],
+        "tags": [
+          "Promotions"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PromoCodeCreateRequest"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/PromoCodeCreateRequest"
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/PromoCodeCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "JWTCookieAuth": []
+          },
+          {
+            "JWTBearerAuth": []
+          }
+        ],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PromoCodeResponse"
+                }
+              }
+            },
+            "description": ""
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StapelError"
+                }
+              }
+            },
+            "description": "Bad Request",
+            "x-stapel-errors": [
+              "error.400.promo_code_format_invalid"
+            ]
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StapelError"
+                }
+              }
+            },
+            "description": "Not Found",
+            "x-stapel-errors": [
+              "error.404.promotion_not_found"
+            ]
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StapelError"
+                }
+              }
+            },
+            "description": "Conflict",
+            "x-stapel-errors": [
+              "error.409.promo_code_taken"
+            ]
+          }
+        },
+        "x-stapel-flows": [
+          "promotions.manage"
+        ]
+      }
+    },
+    "/promotions/api/v1/staff/promotions/{promotion_id}/codes/export/": {
+      "get": {
+        "operationId": "promotions_staff_codes_export",
+        "description": "A promotion's codes as CSV, streamed; cells are formula-injection safe (staff).\n\n**Permissions:** `IsStaffUser`",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "batch",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Only the codes of this generation batch."
+          },
+          {
+            "in": "path",
+            "name": "promotion_id",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true
+          }
+        ],
+        "tags": [
+          "Promotions"
+        ],
+        "security": [
+          {
+            "JWTCookieAuth": []
+          },
+          {
+            "JWTBearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "text/csv": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": ""
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StapelError"
+                }
+              }
+            },
+            "description": "Not Found",
+            "x-stapel-errors": [
+              "error.404.promotion_not_found"
+            ]
+          }
+        },
+        "x-stapel-flows": [
+          "promotions.manage"
+        ]
+      }
+    },
+    "/promotions/api/v1/staff/promotions/{promotion_id}/codes/generate/": {
+      "post": {
+        "operationId": "promotions_staff_codes_generate",
+        "description": "Renders a service refusal as the fleet error envelope.\n\n**Permissions:** `IsStaffUser`",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "promotion_id",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true
+          }
+        ],
+        "tags": [
+          "Promotions"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CodeGenerateRequest"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/CodeGenerateRequest"
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/CodeGenerateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "JWTCookieAuth": []
+          },
+          {
+            "JWTBearerAuth": []
+          }
+        ],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CodeGenerateResponse"
+                }
+              }
+            },
+            "description": ""
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StapelError"
+                }
+              }
+            },
+            "description": "Bad Request",
+            "x-stapel-errors": [
+              "error.400.generate_count_too_large",
+              "error.400.promo_code_format_invalid"
+            ]
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StapelError"
+                }
+              }
+            },
+            "description": "Not Found",
+            "x-stapel-errors": [
+              "error.404.promotion_not_found"
+            ]
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StapelError"
+                }
+              }
+            },
+            "description": "Conflict",
+            "x-stapel-errors": [
+              "error.409.code_space_exhausted"
+            ]
+          }
+        },
+        "x-stapel-flows": [
+          "promotions.manage"
+        ]
+      }
+    },
+    "/promotions/api/v1/staff/promotions/{promotion_id}/redemptions/": {
+      "get": {
+        "operationId": "promotions_staff_redemptions_list",
+        "description": "Renders a service refusal as the fleet error envelope.\n\n**Permissions:** `IsStaffUser`",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "anchor",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Opaque anchor from next_anchor/prev_anchor (exclusive)."
+          },
+          {
+            "in": "query",
+            "name": "direction",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "next",
+                "prev"
+              ]
+            },
+            "description": "Walk direction from the anchor."
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Page size, default 50, max 200."
+          },
+          {
+            "in": "path",
+            "name": "promotion_id",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true
+          }
+        ],
+        "tags": [
+          "Promotions"
+        ],
+        "security": [
+          {
+            "JWTCookieAuth": []
+          },
+          {
+            "JWTBearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RedemptionPage"
+                }
+              }
+            },
+            "description": ""
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StapelError"
+                }
+              }
+            },
+            "description": "Not Found",
+            "x-stapel-errors": [
+              "error.404.promotion_not_found"
+            ]
+          }
+        },
+        "x-stapel-flows": [
+          "promotions.manage"
+        ],
+        "x-stapel-pagination": {
+          "style": "anchor",
+          "items": "items",
+          "params": [
+            "anchor",
+            "direction",
+            "limit"
+          ]
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ActivePromotionList": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PublicPromotion"
+            }
+          },
+          "truncated": {
+            "type": "boolean",
+            "description": "More promotions are live than ACTIVE_LIST_LIMIT."
+          }
+        },
+        "required": [
+          "items",
+          "truncated"
+        ]
+      },
+      "CodeGenerateRequest": {
+        "type": "object",
+        "properties": {
+          "count": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "At most GENERATE_MAX_PER_CALL."
+          },
+          "prefix": {
+            "type": "string",
+            "maxLength": 16
+          },
+          "length": {
+            "type": "integer",
+            "maximum": 32,
+            "minimum": 6
+          },
+          "usage_limit": {
+            "type": "integer",
+            "maximum": 10000000,
+            "minimum": 1,
+            "nullable": true
+          }
+        },
+        "required": [
+          "count"
+        ]
+      },
+      "CodeGenerateResponse": {
+        "type": "object",
+        "properties": {
+          "batch": {
+            "type": "string",
+            "maxLength": 32
+          },
+          "created": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "codes": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 64
+            }
+          }
+        },
+        "required": [
+          "batch",
+          "codes",
+          "created"
+        ]
+      },
+      "CodeValidateRequest": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "maxLength": 128
+          },
+          "currency": {
+            "type": "string",
+            "maxLength": 3,
+            "pattern": "^[A-Za-z]{3}$"
+          },
+          "subtotal": {
+            "type": "string",
+            "format": "decimal",
+            "pattern": "^-?\\d{0,16}(?:\\.\\d{0,2})?$",
+            "description": "Cart subtotal, for the minimum-amount rule."
+          }
+        },
+        "required": [
+          "code"
+        ]
+      },
+      "CodeValidateResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "The code, normalised.",
+            "maxLength": 128
+          },
+          "valid": {
+            "type": "boolean"
+          },
+          "error": {
+            "type": "string",
+            "nullable": true,
+            "description": "Error key when not valid.",
+            "maxLength": 128
+          },
+          "params": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "maxLength": 128
+            }
+          },
+          "promotion": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PublicPromotion"
+              }
+            ],
+            "nullable": true
+          }
+        },
+        "required": [
+          "code",
+          "error",
+          "params",
+          "promotion",
+          "valid"
+        ]
+      },
+      "PatchedPromoCodeUpdateRequest": {
+        "type": "object",
+        "properties": {
+          "is_active": {
+            "type": "boolean"
+          },
+          "usage_limit": {
+            "type": "integer",
+            "maximum": 10000000,
+            "minimum": 1,
+            "nullable": true
+          }
+        }
+      },
+      "PatchedPromotionWriteRequest": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "description": "Generated from the name when blank.",
+            "oneOf": [
+              {
+                "type": "string",
+                "maxLength": 58,
+                "pattern": "^[-a-zA-Z0-9_]+$"
+              },
+              {
+                "type": "string",
+                "maxLength": 0
+              }
+            ]
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 500
+          },
+          "kind": {
+            "$ref": "#/components/schemas/PromotionKindEnum"
+          },
+          "value": {
+            "type": "string",
+            "format": "decimal",
+            "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$"
+          },
+          "currency": {
+            "oneOf": [
+              {
+                "type": "string",
+                "maxLength": 3,
+                "pattern": "^[A-Za-z]{3}$"
+              },
+              {
+                "type": "string",
+                "maxLength": 0
+              }
+            ]
+          },
+          "max_discount": {
+            "type": "string",
+            "format": "decimal",
+            "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
+            "nullable": true
+          },
+          "min_subtotal": {
+            "type": "string",
+            "format": "decimal",
+            "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
+            "nullable": true
+          },
+          "scope": {
+            "$ref": "#/components/schemas/PromotionScopeEnum"
+          },
+          "scope_type": {
+            "type": "string",
+            "maxLength": 32
+          },
+          "scope_keys": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 255
+            },
+            "maxItems": 500
+          },
+          "free_shipping_methods": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 32
+            },
+            "description": "free_shipping only: delivery method codes it waives; empty = every method.",
+            "maxItems": 20
+          },
+          "starts_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "ends_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "is_active": {
+            "type": "boolean"
+          },
+          "automatic": {
+            "type": "boolean"
+          },
+          "stackable": {
+            "type": "boolean"
+          },
+          "priority": {
+            "type": "integer",
+            "maximum": 1000,
+            "minimum": -1000
+          },
+          "usage_limit_total": {
+            "type": "integer",
+            "maximum": 10000000,
+            "minimum": 1,
+            "nullable": true
+          },
+          "usage_limit_per_user": {
+            "type": "integer",
+            "maximum": 10000000,
+            "minimum": 1,
+            "nullable": true
+          }
+        }
+      },
+      "PromoCodeCreateRequest": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Stored upper-cased.",
+            "maxLength": 64
+          },
+          "usage_limit": {
+            "type": "integer",
+            "maximum": 10000000,
+            "minimum": 1,
+            "nullable": true
+          },
+          "assigned_user_id": {
+            "type": "string",
+            "maxLength": 64
+          },
+          "is_active": {
+            "type": "boolean",
+            "default": true
+          }
+        },
+        "required": [
+          "code"
+        ]
+      },
+      "PromoCodePage": {
+        "type": "object",
+        "description": "Anchor envelope of a promotion's codes (schema only).",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PromoCodeResponse"
+            }
+          },
+          "next_anchor": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 64
+          },
+          "prev_anchor": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 64
+          },
+          "has_next": {
+            "type": "boolean"
+          },
+          "has_prev": {
+            "type": "boolean"
+          },
+          "count": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "count",
+          "has_next",
+          "has_prev",
+          "items",
+          "next_anchor",
+          "prev_anchor"
+        ],
+        "x-stapel-pagination": {
+          "style": "anchor",
+          "items": "items"
+        }
+      },
+      "PromoCodeResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "promotion_id": {
+            "type": "integer"
+          },
+          "code": {
+            "type": "string",
+            "maxLength": 64
+          },
+          "is_active": {
+            "type": "boolean"
+          },
+          "usage_limit": {
+            "type": "integer",
+            "nullable": true
+          },
+          "used": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Committed uses."
+          },
+          "assigned_user_id": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 64
+          },
+          "batch": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 32
+          },
+          "revoked_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "Set when an issuer revoked the code; it never applies again."
+          },
+          "revoke_reason": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 64
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "assigned_user_id",
+          "batch",
+          "code",
+          "created_at",
+          "id",
+          "is_active",
+          "promotion_id",
+          "revoke_reason",
+          "revoked_at",
+          "usage_limit",
+          "used"
+        ]
+      },
+      "PromotionKindEnum": {
+        "enum": [
+          "percent",
+          "fixed",
+          "free_shipping"
+        ],
+        "type": "string",
+        "description": "* `percent` - Percent off\n* `fixed` - Fixed amount off\n* `free_shipping` - Free shipping"
+      },
+      "PromotionPage": {
+        "type": "object",
+        "description": "Anchor envelope of the staff promotion list (schema only).",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PromotionResponse"
+            }
+          },
+          "next_anchor": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 64
+          },
+          "prev_anchor": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 64
+          },
+          "has_next": {
+            "type": "boolean"
+          },
+          "has_prev": {
+            "type": "boolean"
+          },
+          "count": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "count",
+          "has_next",
+          "has_prev",
+          "items",
+          "next_anchor",
+          "prev_anchor"
+        ],
+        "x-stapel-pagination": {
+          "style": "anchor",
+          "items": "items"
+        }
+      },
+      "PromotionResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "key": {
+            "type": "string",
+            "maxLength": 58
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 500
+          },
+          "kind": {
+            "$ref": "#/components/schemas/PromotionKindEnum"
+          },
+          "value": {
+            "type": "string",
+            "format": "decimal",
+            "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$"
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 3
+          },
+          "max_discount": {
+            "type": "string",
+            "format": "decimal",
+            "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
+            "nullable": true
+          },
+          "min_subtotal": {
+            "type": "string",
+            "format": "decimal",
+            "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
+            "nullable": true
+          },
+          "scope": {
+            "$ref": "#/components/schemas/PromotionScopeEnum"
+          },
+          "scope_type": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 32
+          },
+          "scope_keys": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 255
+            },
+            "maxItems": 500
+          },
+          "free_shipping_methods": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 32
+            },
+            "maxItems": 20
+          },
+          "starts_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "ends_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "is_active": {
+            "type": "boolean"
+          },
+          "automatic": {
+            "type": "boolean"
+          },
+          "stackable": {
+            "type": "boolean"
+          },
+          "priority": {
+            "type": "integer",
+            "maximum": 1000,
+            "minimum": -1000
+          },
+          "usage_limit_total": {
+            "type": "integer",
+            "nullable": true
+          },
+          "usage_limit_per_user": {
+            "type": "integer",
+            "nullable": true
+          },
+          "usage": {
+            "$ref": "#/components/schemas/PromotionUsage"
+          },
+          "code_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "live": {
+            "type": "boolean",
+            "description": "Active and inside its window now."
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "automatic",
+          "code_count",
+          "created_at",
+          "currency",
+          "description",
+          "ends_at",
+          "free_shipping_methods",
+          "id",
+          "is_active",
+          "key",
+          "kind",
+          "live",
+          "max_discount",
+          "min_subtotal",
+          "name",
+          "priority",
+          "scope",
+          "scope_keys",
+          "scope_type",
+          "stackable",
+          "starts_at",
+          "updated_at",
+          "usage",
+          "usage_limit_per_user",
+          "usage_limit_total",
+          "value"
+        ]
+      },
+      "PromotionScopeEnum": {
+        "enum": [
+          "cart",
+          "purchasable_type",
+          "keys"
+        ],
+        "type": "string",
+        "description": "* `cart` - Whole cart\n* `purchasable_type` - One purchasable type\n* `keys` - Listed purchasables"
+      },
+      "PromotionUsage": {
+        "type": "object",
+        "properties": {
+          "committed": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "reserved": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "committed",
+          "reserved"
+        ]
+      },
+      "PromotionWriteRequest": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "description": "Generated from the name when blank.",
+            "oneOf": [
+              {
+                "type": "string",
+                "maxLength": 58,
+                "pattern": "^[-a-zA-Z0-9_]+$"
+              },
+              {
+                "type": "string",
+                "maxLength": 0
+              }
+            ]
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 500
+          },
+          "kind": {
+            "$ref": "#/components/schemas/PromotionKindEnum"
+          },
+          "value": {
+            "type": "string",
+            "format": "decimal",
+            "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$"
+          },
+          "currency": {
+            "oneOf": [
+              {
+                "type": "string",
+                "maxLength": 3,
+                "pattern": "^[A-Za-z]{3}$"
+              },
+              {
+                "type": "string",
+                "maxLength": 0
+              }
+            ]
+          },
+          "max_discount": {
+            "type": "string",
+            "format": "decimal",
+            "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
+            "nullable": true
+          },
+          "min_subtotal": {
+            "type": "string",
+            "format": "decimal",
+            "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
+            "nullable": true
+          },
+          "scope": {
+            "$ref": "#/components/schemas/PromotionScopeEnum"
+          },
+          "scope_type": {
+            "type": "string",
+            "maxLength": 32
+          },
+          "scope_keys": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 255
+            },
+            "maxItems": 500
+          },
+          "free_shipping_methods": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 32
+            },
+            "description": "free_shipping only: delivery method codes it waives; empty = every method.",
+            "maxItems": 20
+          },
+          "starts_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "ends_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "is_active": {
+            "type": "boolean"
+          },
+          "automatic": {
+            "type": "boolean"
+          },
+          "stackable": {
+            "type": "boolean"
+          },
+          "priority": {
+            "type": "integer",
+            "maximum": 1000,
+            "minimum": -1000
+          },
+          "usage_limit_total": {
+            "type": "integer",
+            "maximum": 10000000,
+            "minimum": 1,
+            "nullable": true
+          },
+          "usage_limit_per_user": {
+            "type": "integer",
+            "maximum": 10000000,
+            "minimum": 1,
+            "nullable": true
+          }
+        },
+        "required": [
+          "kind",
+          "name"
+        ]
+      },
+      "PublicPromotion": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "maxLength": 58
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 500
+          },
+          "kind": {
+            "$ref": "#/components/schemas/PromotionKindEnum"
+          },
+          "value": {
+            "type": "string",
+            "format": "decimal",
+            "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
+            "description": "Percent for percent, an amount for fixed, 0.00 for free shipping."
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 3
+          },
+          "max_discount": {
+            "type": "string",
+            "format": "decimal",
+            "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
+            "nullable": true
+          },
+          "min_subtotal": {
+            "type": "string",
+            "format": "decimal",
+            "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
+            "nullable": true
+          },
+          "scope": {
+            "$ref": "#/components/schemas/PromotionScopeEnum"
+          },
+          "automatic": {
+            "type": "boolean"
+          },
+          "ends_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "required": [
+          "automatic",
+          "currency",
+          "description",
+          "ends_at",
+          "key",
+          "kind",
+          "max_discount",
+          "min_subtotal",
+          "name",
+          "scope",
+          "value"
+        ]
+      },
+      "RedemptionPage": {
+        "type": "object",
+        "description": "Anchor envelope of a promotion's ledger (schema only).",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RedemptionResponse"
+            }
+          },
+          "next_anchor": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 64
+          },
+          "prev_anchor": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 64
+          },
+          "has_next": {
+            "type": "boolean"
+          },
+          "has_prev": {
+            "type": "boolean"
+          },
+          "count": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "count",
+          "has_next",
+          "has_prev",
+          "items",
+          "next_anchor",
+          "prev_anchor"
+        ],
+        "x-stapel-pagination": {
+          "style": "anchor",
+          "items": "items"
+        }
+      },
+      "RedemptionResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "promotion_id": {
+            "type": "integer"
+          },
+          "code": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 64
+          },
+          "user_id": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 64
+          },
+          "status": {
+            "$ref": "#/components/schemas/RedemptionStatusEnum"
+          },
+          "amount": {
+            "type": "string",
+            "format": "decimal",
+            "pattern": "^-?\\d{0,16}(?:\\.\\d{0,2})?$"
+          },
+          "currency": {
+            "type": "string",
+            "maxLength": 3
+          },
+          "free_shipping": {
+            "type": "boolean"
+          },
+          "attempt_key": {
+            "type": "string",
+            "maxLength": 128
+          },
+          "order_id": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 64
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "amount",
+          "attempt_key",
+          "code",
+          "created_at",
+          "currency",
+          "free_shipping",
+          "id",
+          "order_id",
+          "promotion_id",
+          "status",
+          "updated_at",
+          "user_id"
+        ]
+      },
+      "RedemptionStatusEnum": {
+        "enum": [
+          "reserved",
+          "committed",
+          "released",
+          "expired"
+        ],
+        "type": "string",
+        "description": "* `reserved` - Reserved\n* `committed` - Committed\n* `released` - Released\n* `expired` - Expired"
+      },
+      "StapelError": {
+        "type": "object",
+        "description": "Structured error returned by all Stapel API endpoints.",
+        "properties": {
+          "localizable_error": {
+            "type": "string",
+            "description": "Translation key for client-side localization",
+            "example": "error.404.not_found"
+          },
+          "error": {
+            "type": "string",
+            "description": "Human-readable fallback/debug message — not reliably English,"
+          },
+          "params": {
+            "type": "object",
+            "additionalProperties": {},
+            "description": "Context values for template placeholders",
+            "example": {
+              "retry_after": 30
+            }
+          },
+          "error_language": {
+            "type": "string",
+            "description": "The language `error` is written in (e.g. 'en', 'ru'),"
+          }
+        },
+        "required": [
+          "error",
+          "localizable_error"
+        ]
+      }
+    },
+    "securitySchemes": {
+      "JWTBearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "JWT access token in the `Authorization: Bearer <token>` header — the credential a native client sends. When the JWT cookie is also present, the cookie wins."
+      },
+      "JWTCookieAuth": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "stapel_jwt",
+        "description": "JWT token stored in cookie. Login via /auth/admin/ to get the cookie."
+      }
+    }
+  }
+}

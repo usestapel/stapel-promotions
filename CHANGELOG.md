@@ -6,6 +6,11 @@ Pre-1.0 semver: **minor = breaking**, patch = compatible.
 
 ## [Unreleased]
 
+- **Contract profile 2:** `docs/schema.v2.json` beside `docs/schema.json`, for
+  a native client generator; `tests/test_contract_profile2.py` on stapel-tools
+  0.84.0 `contract_gates`; `make contract-check` in CI. Requires
+  stapel-core 0.99.3 (errors.json and the generic 404 binding).
+
 ## [0.1.0] (unreleased — the entries below land in it)
 
 First release: promo codes and automatic discounts over opaque purchasables.

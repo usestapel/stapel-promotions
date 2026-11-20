@@ -29,7 +29,7 @@ pip install stapel-promotions
 | HTTP operations | 14 |
 | Config axes | 1 |
 | Extension points | 7 |
-| Error codes | 66 |
+| Error codes | 67 |
 | Documented flows | 2 |
 | Fleet dependencies | [`stapel-auth`](https://github.com/usestapel/stapel-auth) (optional) · [`stapel-core`](https://github.com/usestapel/stapel-core) · [`stapel-orders`](https://github.com/usestapel/stapel-orders) (optional) |
 
